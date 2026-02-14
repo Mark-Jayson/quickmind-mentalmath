@@ -1,0 +1,276 @@
+<template>
+  <div class="lesson-page">
+    <header class="lesson-header">
+      <router-link to="/curriculum" class="back-link">
+        <component :is="ArrowLeft" :size="16" />
+        Back to Curriculum
+      </router-link>
+      <p class="lesson-tag">LESSON</p>
+      <h1>{{ lessonData.title }}</h1>
+      <p class="lesson-desc">{{ lessonData.description }}</p>
+      <hr class="plasma-line" />
+    </header>
+
+    <!-- Lesson Steps -->
+    <div class="lesson-content">
+      <div class="steps-nav">
+        <button
+          v-for="(step, i) in lessonData.steps"
+          :key="i"
+          :class="['step-tab', { 'step-tab--active': currentStep === i, 'step-tab--done': currentStep > i }]"
+          @click="currentStep = i"
+        >
+          {{ i + 1 }}
+        </button>
+        <div class="step-progress" :style="{ width: `${((currentStep) / (lessonData.steps.length - 1)) * 100}%` }" />
+      </div>
+
+      <div class="step-content animate-fade-in" :key="currentStep">
+        <h2>{{ lessonData.steps[currentStep].title }}</h2>
+        <div v-html="lessonData.steps[currentStep].content" class="step-body" />
+
+        <div v-if="lessonData.steps[currentStep].example" class="example-box">
+          <div class="example-label">EXAMPLE</div>
+          <div class="example-content" v-html="lessonData.steps[currentStep].example" />
+        </div>
+      </div>
+
+      <div class="step-nav-buttons">
+        <QmButton v-if="currentStep > 0" variant="ghost" @click="currentStep--">
+          <component :is="ArrowLeft" :size="16" />
+          Previous
+        </QmButton>
+        <div class="spacer" />
+        <QmButton v-if="currentStep < lessonData.steps.length - 1" variant="primary" @click="currentStep++">
+          Next
+          <component :is="ArrowRight" :size="16" />
+        </QmButton>
+        <QmButton v-else variant="primary" @click="completeLesson">
+          Complete Lesson
+          <component :is="Check" :size="16" />
+        </QmButton>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ArrowLeft, ArrowRight, Check } from 'lucide-vue-next'
+import QmButton from '@/components/ui/QmButton.vue'
+
+const route = useRoute()
+const router = useRouter()
+const currentStep = ref(0)
+
+const lessonsDB = {
+  left_to_right_addition: {
+    title: 'Left-to-Right Addition',
+    description: 'Add numbers from left to right instead of right to left.',
+    steps: [
+      { title: 'Why Left to Right?', content: '<p>In school, you learned to add from <strong>right to left</strong> — ones, tens, hundreds. But mathemagicians add from <strong>left to right</strong>, processing the most significant digits first.</p><p>This is faster because you start saying the answer immediately, and most of the time the leading digits don\'t change.</p>', example: '<p><strong>358 + 247</strong></p><p>Start with hundreds: 300 + 200 = <strong>500</strong></p><p>Add tens: 50 + 40 = 90 → <strong>590</strong></p><p>Add ones: 8 + 7 = 15 → <strong>605</strong></p>' },
+      { title: 'The Running Total', content: '<p>Keep a <strong>running total</strong> in your head. Start with the leftmost column and keep adding the next column\'s sum to your running total.</p><p>The key insight: you\'re always working with a single number in your head, modifying it step by step.</p>', example: '<p><strong>672 + 495</strong></p><p>600 + 400 = <strong>1000</strong></p><p>70 + 90 = 160 → <strong>1160</strong></p><p>2 + 5 = 7 → <strong>1167</strong></p>' },
+      { title: 'Handling Carries', content: '<p>What if adding a column causes the previous digit to change? This is called a <strong>carry</strong>.</p><p>When the sum of a column is 10 or more, you bump up the digit to the left by 1. With practice, you\'ll anticipate carries before they happen.</p>', example: '<p><strong>867 + 586</strong></p><p>800 + 500 = <strong>1300</strong></p><p>60 + 80 = 140 → <strong>1440</strong></p><p>7 + 6 = 13 → <strong>1453</strong></p>' },
+    ],
+  },
+  complement_addition: {
+    title: 'Complements & Carries',
+    description: 'Use complements of 10 to simplify mental carries.',
+    steps: [
+      { title: 'What is a Complement?', content: '<p>The <strong>complement</strong> of a digit is what you add to get 10. Knowing complements instantly helps you handle carries more efficiently.</p>', example: '<p>Complements: 1↔9, 2↔8, 3↔7, 4↔6, 5↔5</p>' },
+      { title: 'Using Complements', content: '<p>When a column sums to 10+, instead of carrying, think: "the ones digit is the complement\'s complement." This becomes instant with practice.</p>', example: '<p><strong>8 + 7 = 15</strong> — Complement of 7 = 3, so ones digit = 5, carry 1</p>' },
+    ],
+  },
+  '2by1_multiplication': {
+    title: '2-Digit × 1-Digit',
+    description: 'Break apart the 2-digit number and multiply left-to-right.',
+    steps: [
+      { title: 'The Distributive Method', content: '<p>To multiply a 2-digit number by a 1-digit number, <strong>break the 2-digit number</strong> into tens and ones, multiply each part, and add.</p>', example: '<p><strong>47 × 8</strong></p><p>= (40 × 8) + (7 × 8) = 320 + 56 = <strong>376</strong></p>' },
+      { title: 'Practice Approach', content: '<p>Say the first partial product, then add the second. Always multiply the <strong>tens digit first</strong>.</p>', example: '<p><strong>63 × 7</strong></p><p>60 × 7 = 420, 3 × 7 = 21, 420 + 21 = <strong>441</strong></p>' },
+    ],
+  },
+  '3by1_multiplication': {
+    title: '3-Digit × 1-Digit',
+    description: 'Extend left-to-right multiplication to 3-digit numbers.',
+    steps: [
+      { title: 'Extending the Method', content: '<p>Same logic as 2×1 but with one more step. Break the 3-digit number into hundreds, tens, and ones.</p>', example: '<p><strong>632 × 7</strong></p><p>= 4200 + 210 + 14 = <strong>4424</strong></p>' },
+    ],
+  },
+  squaring_numbers: {
+    title: 'Squaring Numbers',
+    description: 'Use the difference-of-squares identity to square any 2-digit number.',
+    steps: [
+      { title: 'The Key Identity', content: '<p><strong>a² = (a + d)(a − d) + d²</strong></p><p>Choose <em>d</em> so that one factor becomes a round number (multiple of 10).</p>', example: '<p><strong>67²</strong> — d = 3 → 70 × 64 + 9 = <strong>4489</strong></p>' },
+      { title: 'Choosing d', content: '<p>Always round to the nearest multiple of 10. If the ones digit is ≤ 5, round down; if > 5, round up.</p>', example: '<p><strong>46²</strong>: (50)(42) + 16 = <strong>2116</strong></p><p><strong>83²</strong>: (86)(80) + 9 = <strong>6889</strong></p>' },
+    ],
+  },
+  '2by2_criss_cross': {
+    title: '2-Digit × 2-Digit (Criss-Cross)',
+    description: 'The showpiece criss-cross method for multiplying any two 2-digit numbers.',
+    steps: [
+      { title: 'The Criss-Cross Method', content: '<p>For <strong>AB × CD</strong>:</p><ol><li><strong>Hundreds:</strong> A × C</li><li><strong>Cross:</strong> (A × D) + (B × C)</li><li><strong>Ones:</strong> B × D</li></ol><p>Combine them left-to-right, carrying as needed.</p>', example: '<p><strong>46 × 73</strong></p><p>28 → 2800, Cross: 54 → +540 = 3340, Ones: 18 → <strong>3358</strong></p>' },
+    ],
+  },
+  phonetic_code: {
+    title: 'The Phonetic Code',
+    description: 'Convert numbers to consonant sounds to create memorable words.',
+    steps: [
+      { title: 'The Number-Sound Map', content: '<p>Each digit maps to consonant sounds: 0=S/Z, 1=T/D, 2=N, 3=M, 4=R, 5=L, 6=CH/SH/J, 7=K/G, 8=F/V, 9=P/B</p>', example: '<p><strong>87 = FoG</strong>, <strong>32 = MoN</strong></p>' },
+    ],
+  },
+  mental_workspace: {
+    title: 'Mental Workspace Management',
+    description: 'Strategies for holding intermediate values during calculations.',
+    steps: [
+      { title: 'Chunking Strategy', content: '<p>Your working memory can hold about 4 chunks. Instead of remembering individual digits, remember <strong>partial products</strong> as complete numbers.</p>', example: '<p><strong>46 × 73</strong>: Hold "2800 → 3340 → 3358" not "4, 6, 7, 3, 28, 42, 12..."</p>' },
+    ],
+  },
+}
+
+const lessonData = computed(() => {
+  return lessonsDB[route.params.id] || {
+    title: 'Lesson Not Found',
+    description: 'This lesson does not exist.',
+    steps: [{ title: 'Not Found', content: '<p>Please go back to the curriculum.</p>' }],
+  }
+})
+
+function completeLesson() {
+  router.push('/curriculum')
+}
+</script>
+
+<style scoped>
+.lesson-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-subtext);
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1rem;
+  transition: color 0.2s;
+}
+
+.back-link:hover { color: var(--color-plasma); }
+
+.lesson-header { margin-bottom: 2rem; }
+
+.lesson-tag {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--color-plasma);
+  margin-bottom: 0.5rem;
+}
+
+.lesson-header h1 { font-size: 1.75rem; margin-bottom: 0.4rem; }
+.lesson-desc { color: var(--color-subtext); font-size: 0.9rem; }
+
+.steps-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-border-light);
+}
+
+.step-tab {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-workshop-alt);
+  border: 1px solid var(--color-border-light);
+  border-radius: 50%;
+  color: var(--color-subtext);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 1;
+}
+
+.step-tab--active {
+  background: var(--color-plasma);
+  color: white;
+  border-color: var(--color-plasma);
+}
+
+.step-tab--done {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.step-progress {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  height: 2px;
+  background: var(--color-plasma);
+  transition: width 0.3s ease;
+}
+
+.step-content { margin-bottom: 2rem; }
+
+.step-content h2 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.step-body {
+  font-size: 0.92rem;
+  color: var(--color-subtext);
+  line-height: 1.8;
+}
+
+.step-body :deep(p) { margin-bottom: 0.8rem; }
+.step-body :deep(strong) { color: var(--color-charcoal); }
+.step-body :deep(ol), .step-body :deep(ul) { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+
+.example-box {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: var(--color-plasma-soft);
+  border: 1px solid rgba(107, 191, 142, 0.25);
+  border-left: 3px solid var(--color-plasma);
+  border-radius: 8px;
+}
+
+.example-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--color-plasma);
+  margin-bottom: 0.65rem;
+}
+
+.example-content {
+  font-size: 0.88rem;
+  line-height: 1.8;
+  color: var(--color-charcoal);
+}
+
+.example-content :deep(p) { margin-bottom: 0.4rem; }
+.example-content :deep(strong) { color: var(--color-plasma-dim); }
+
+.step-nav-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.spacer { flex: 1; }
+</style>
