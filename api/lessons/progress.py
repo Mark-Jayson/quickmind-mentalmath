@@ -56,7 +56,7 @@ async def complete_lesson(request: Request):
     if lesson.data and lesson.data.get("badge_id"):
         badge_id = lesson.data["badge_id"]
         # Check if already earned
-        existing = supabase.table("user_badges").select("id").eq("user_id", user["id"]).eq("badge_id", badge_id).single().execute()
+        existing = supabase.table("user_badges").select("id").eq("user_id", user["id"]).eq("badge_id", badge_id).execute()
         
         if not existing.data:
             supabase.table("user_badges").insert({

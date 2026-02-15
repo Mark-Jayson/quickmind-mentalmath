@@ -10,8 +10,8 @@
             v2.0 Now Available
           </div>
           <h1 class="hero-title animate-fade-in-up delay-100">
-            Unlock your<br />
-            <span class="text-gradient">super computer.</span>
+            Master<br />
+            <span class="text-gradient">Mental Mathematics.</span>
           </h1>
           <p class="hero-subtitle animate-fade-in-up delay-200">
             Master the art of mental calculation. Learn advanced techniques, challenge your cognitive limits, and join a global community of mathletes.
@@ -73,12 +73,12 @@
     <div class="stats-strip">
       <div class="stats-inner">
         <div class="stat-item">
-          <span class="stat-num">50+</span>
+          <span class="stat-num">10+</span>
           <span class="stat-label">Interactive Lessons</span>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-          <span class="stat-num">12k+</span>
+          <span class="stat-num">100+</span>
           <span class="stat-label">Challenges Solved</span>
         </div>
         <div class="stat-divider"></div>
