@@ -13,43 +13,51 @@
 
     <!-- Lesson Steps -->
     <div class="lesson-content">
-      <div class="steps-nav">
-        <button
-          v-for="(step, i) in lessonData.steps"
-          :key="i"
-          :class="['step-tab', { 'step-tab--active': currentStep === i, 'step-tab--done': currentStep > i }]"
-          @click="currentStep = i"
-        >
-          {{ i + 1 }}
-        </button>
-        <div class="step-progress" :style="{ width: `${((currentStep) / (lessonData.steps.length - 1)) * 100}%` }" />
-      </div>
-
-      <div class="step-content animate-fade-in" :key="currentStep">
-        <h2>{{ lessonData.steps[currentStep].title }}</h2>
-        <div v-html="lessonData.steps[currentStep].content" class="step-body" />
-
-        <div v-if="lessonData.steps[currentStep].example" class="example-box">
-          <div class="example-label">EXAMPLE</div>
-          <div class="example-content" v-html="lessonData.steps[currentStep].example" />
+      <template v-if="!showQuiz">
+        <div class="steps-nav">
+          <button
+            v-for="(step, i) in lessonData.steps"
+            :key="i"
+            :class="['step-tab', { 'step-tab--active': currentStep === i, 'step-tab--done': currentStep > i }]"
+            @click="currentStep = i"
+          >
+            {{ i + 1 }}
+          </button>
+          <div class="step-progress" :style="{ width: `${((currentStep) / (lessonData.steps.length - 1)) * 100}%` }" />
         </div>
-      </div>
 
-      <div class="step-nav-buttons">
-        <QmButton v-if="currentStep > 0" variant="ghost" @click="currentStep--">
-          <component :is="ArrowLeft" :size="16" />
-          Previous
-        </QmButton>
-        <div class="spacer" />
-        <QmButton v-if="currentStep < lessonData.steps.length - 1" variant="primary" @click="currentStep++">
-          Next
-          <component :is="ArrowRight" :size="16" />
-        </QmButton>
-        <QmButton v-else variant="primary" @click="completeLesson">
-          Complete Lesson
-          <component :is="Check" :size="16" />
-        </QmButton>
-      </div>
+        <div class="step-content animate-fade-in" :key="currentStep">
+          <h2>{{ lessonData.steps[currentStep].title }}</h2>
+          <div v-html="lessonData.steps[currentStep].content" class="step-body" />
+
+          <div v-if="lessonData.steps[currentStep].example" class="example-box">
+            <div class="example-label">EXAMPLE</div>
+            <div class="example-content" v-html="lessonData.steps[currentStep].example" />
+          </div>
+        </div>
+
+        <div class="step-nav-buttons">
+          <QmButton v-if="currentStep > 0" variant="ghost" @click="currentStep--">
+            <component :is="ArrowLeft" :size="16" />
+            Previous
+          </QmButton>
+          <div class="spacer" />
+          <QmButton v-if="currentStep < lessonData.steps.length - 1" variant="primary" @click="currentStep++">
+            Next
+            <component :is="ArrowRight" :size="16" />
+          </QmButton>
+          <QmButton v-else variant="primary" @click="showQuiz = true">
+            Take Mastery Quiz
+            <component :is="Zap" :size="16" />
+          </QmButton>
+        </div>
+      </template>
+
+      <LessonQuiz 
+        v-else 
+        :lessonId="$route.params.id" 
+        @complete="completeLesson" 
+      />
     </div>
   </div>
 </template>
@@ -57,12 +65,18 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, ArrowRight, Check } from 'lucide-vue-next'
+import { ArrowLeft, ArrowRight, Check, Zap } from 'lucide-vue-next'
 import QmButton from '@/components/ui/QmButton.vue'
+import LessonQuiz from '@/components/features/LessonQuiz.vue'
+import { useLessonsStore } from '@/stores/lessons'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
+const lessonsStore = useLessonsStore()
+const authStore = useAuthStore()
 const currentStep = ref(0)
+const showQuiz = ref(false)
 
 const lessonsDB = {
   left_to_right_addition: {
@@ -172,7 +186,11 @@ const lessonData = computed(() => {
   }
 })
 
-function completeLesson() {
+async function completeLesson(quizScore) {
+  if (authStore.user) {
+    await lessonsStore.markComplete(authStore.user.id, route.params.id, quizScore)
+    await authStore.fetchProfile() // Ensure XP reflects in header
+  }
   router.push('/curriculum')
 }
 </script>

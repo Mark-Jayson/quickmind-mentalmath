@@ -39,21 +39,39 @@
       </div>
     </section>
 
-    <!-- Recent Activity -->
+    <!-- Recent Activity & Badges -->
     <section class="recent-section animate-fade-in-up delay-300">
       <div class="two-col">
         <div class="col">
           <h2 class="section-title">Recent Activity</h2>
-          <div class="placeholder-card">
+          <div v-if="recentSessions.length === 0" class="placeholder-card">
             <component :is="Activity" :size="20" class="placeholder-icon" />
             <p>Your recent sessions will appear here once you start playing.</p>
+          </div>
+          <div v-else class="activity-list">
+            <div v-for="session in recentSessions" :key="session.id" class="activity-item">
+              <div class="activity-main">
+                <span class="activity-cat">{{ session.category }}</span>
+                <span class="activity-acc">{{ Math.round(session.accuracy * 100) }}%</span>
+              </div>
+              <div class="activity-meta">
+                <span>{{ session.score }} answers</span> • <span>{{ Math.round(session.avg_time_ms / 1000) }}s avg</span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="col">
           <h2 class="section-title">Badges Earned</h2>
-          <div class="placeholder-card">
+          <div v-if="groupedBadges.length === 0" class="placeholder-card">
             <component :is="Award" :size="20" class="placeholder-icon" />
             <p>Complete lessons and challenges to earn badges.</p>
+          </div>
+          <div v-else class="badges-grid">
+            <BadgeItem
+              v-for="badge in groupedBadges"
+              :key="badge.id"
+              v-bind="badge"
+            />
           </div>
         </div>
       </div>
@@ -62,10 +80,44 @@
 </template>
 
 <script setup>
+import { onMounted, computed, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useProfileStore } from '@/stores/profile'
+import { supabase } from '@/lib/supabase'
 import { Zap, Timer, BookOpen, Trophy, Activity, Award } from 'lucide-vue-next'
+import BadgeItem from '@/components/features/BadgeItem.vue'
 
 const authStore = useAuthStore()
+const profileStore = useProfileStore()
+const recentSessions = ref([])
+
+onMounted(async () => {
+  if (authStore.user) {
+    profileStore.fetchBadges(authStore.user.id)
+    fetchRecentSessions()
+  }
+})
+
+async function fetchRecentSessions() {
+  const { data } = await supabase
+    .from('mathlympics_sessions')
+    .select('*')
+    .eq('user_id', authStore.user.id)
+    .order('played_at', { ascending: false })
+    .limit(5)
+  recentSessions.value = data || []
+}
+
+const groupedBadges = computed(() => {
+  const groups = {}
+  profileStore.badges.forEach(badge => {
+    if (!groups[badge.id]) {
+      groups[badge.id] = { ...badge, count: 0 }
+    }
+    groups[badge.id].count++
+  })
+  return Object.values(groups)
+})
 </script>
 
 <style scoped>
@@ -187,21 +239,53 @@ const authStore = useAuthStore()
   gap: 1.5rem;
 }
 
-.placeholder-card {
-  padding: 2rem;
-  border: 1px dashed var(--color-border-light);
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 1.25rem;
+  padding: 0.5rem;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.activity-item {
+  padding: 1rem;
+  background: var(--color-background);
+  border: 1px solid var(--color-border-light);
   border-radius: 10px;
-  text-align: center;
+  transition: all 0.2s;
 }
 
-.placeholder-icon {
-  color: var(--color-subtext);
-  opacity: 0.4;
-  margin-bottom: 0.75rem;
+.activity-item:hover {
+  border-color: var(--color-plasma);
+  background: var(--color-plasma-soft);
 }
 
-.placeholder-card p {
-  font-size: 0.82rem;
+.activity-main {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.activity-cat {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.activity-acc {
+  font-weight: 800;
+  color: var(--color-plasma);
+  font-size: 0.85rem;
+}
+
+.activity-meta {
+  font-size: 0.75rem;
   color: var(--color-subtext);
 }
 

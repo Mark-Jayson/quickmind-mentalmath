@@ -86,10 +86,58 @@ export const useMathlympicsStore = defineStore('mathlympics', () => {
         }
 
         const { error } = await supabase.from('mathlympics_sessions').insert(sessionData)
-        if (error) console.error('Failed to save session:', error)
+        if (error) {
+            console.error('Failed to save session:', error)
+            return
+        }
 
-        // Simple client-side badge awarding (for immediate feedback)
-        checkBadges()
+        // Award base 2 XP for completing a session
+        await awardXP(2)
+
+        // Check for milestones and competitive badges
+        await checkBadges()
+        await checkTop3()
+    }
+
+    async function awardXP(amount) {
+        if (!authStore.user) return
+        const { data: profile } = await supabase.from('profiles').select('xp').eq('id', authStore.user.id).single()
+        if (profile) {
+            await supabase.from('profiles').update({ xp: (profile.xp || 0) + amount }).eq('id', authStore.user.id)
+            await authStore.fetchProfile() // Sync UI
+        }
+    }
+
+    async function checkTop3() {
+        if (!authStore.user) return
+
+        // Query top 3 for current category and size
+        const { data: top3, error } = await supabase
+            .from('mathlympics_sessions')
+            .select('user_id')
+            .eq('category', category.value)
+            .eq('set_size', setSize.value)
+            .order('accuracy', { ascending: false })
+            .order('total_time_ms', { ascending: true })
+            .limit(3)
+
+        if (error || !top3) return
+
+        const rank = top3.findIndex(s => s.user_id === authStore.user.id) + 1
+        let badgeId = null
+        if (rank === 1) badgeId = 'medal_gold'
+        else if (rank === 2) badgeId = 'medal_silver'
+        else if (rank === 3) badgeId = 'medal_bronze'
+
+        if (badgeId) {
+            const { error: badgeError } = await supabase.from('user_badges').insert({
+                user_id: authStore.user.id,
+                badge_id: badgeId
+            })
+            if (!badgeError) {
+                await awardXP(200) // Top 3 reward
+            }
+        }
     }
 
     async function checkBadges() {
@@ -100,7 +148,7 @@ export const useMathlympicsStore = defineStore('mathlympics', () => {
         const { count } = await supabase.from('mathlympics_sessions').select('*', { count: 'exact', head: true }).eq('user_id', authStore.user.id)
         if (count === 1) newBadges.push('mathlympics_first_session')
 
-        // Perfect scores
+        // Perfect scores (Mastery)
         if (accuracy.value === 1) {
             if (category.value === '2x1') newBadges.push('mathlympics_2x1_perfect')
             if (category.value === '3x1') newBadges.push('mathlympics_3x1_perfect')
@@ -115,22 +163,16 @@ export const useMathlympicsStore = defineStore('mathlympics', () => {
         if (setSize.value === 40) newBadges.push('mathlympics_40_set')
 
         for (const badgeId of newBadges) {
-            // Try to insert badge (ignore if already exists)
             const { error } = await supabase.from('user_badges').insert({ user_id: authStore.user.id, badge_id: badgeId })
             if (!error) {
-                // Fetch badge XP to update profile
-                const { data: badge } = await supabase.from('badges').select('xp_reward').eq('id', badgeId).single()
-                if (badge) {
-                    const { data: profile } = await supabase.from('profiles').select('xp').eq('id', authStore.user.id).single()
-                    if (profile) {
-                        await supabase.from('profiles').update({ xp: (profile.xp || 0) + badge.xp_reward }).eq('id', authStore.user.id)
-                    }
+                // Award XP based on badge type
+                if (badgeId.includes('perfect') || badgeId === 'mathlympics_first_session') {
+                    await awardXP(10)
+                } else if (badgeId === 'mathlympics_speed_demon' || badgeId === 'mathlympics_40_set') {
+                    await awardXP(50)
                 }
             }
         }
-
-        // Refresh profile to show new XP/Badges
-        await authStore.fetchProfile()
     }
 
     function submitAnswer(answer) {

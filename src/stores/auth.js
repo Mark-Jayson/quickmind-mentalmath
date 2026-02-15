@@ -105,6 +105,24 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    async function signInWithOAuth() {
+        loading.value = true
+        try {
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin
+                }
+            })
+            if (error) throw error
+            return { data, error: null }
+        } catch (error) {
+            return { data: null, error }
+        } finally {
+            loading.value = false
+        }
+    }
+
     return {
         user,
         profile,
@@ -115,6 +133,7 @@ export const useAuthStore = defineStore('auth', () => {
         fetchProfile,
         signUp,
         signIn,
+        signInWithOAuth,
         signOut,
     }
 })

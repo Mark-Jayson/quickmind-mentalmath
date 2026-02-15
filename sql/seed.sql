@@ -2,28 +2,34 @@
 -- Quickmind Seed Data: Badges & Lessons
 -- ==========================================
 
--- Lesson Badges
+-- Lesson Badges (50 XP each)
 INSERT INTO public.badges (id, name, description, icon, category, xp_reward) VALUES
   ('lesson_left_to_right_addition', 'Left-to-Right Adder', 'Completed the Left-to-Right Addition lesson', 'Plus', 'lesson', 50),
   ('lesson_complement_addition', 'Complement Master', 'Completed the Complements & Carries lesson', 'Layers', 'lesson', 50),
-  ('lesson_2by1_multiplication', 'Two-by-One Pro', 'Completed the 2×1 Multiplication lesson', 'Grid3X3', 'lesson', 75),
-  ('lesson_3by1_multiplication', 'Triple Threat', 'Completed the 3×1 Multiplication lesson', 'Calculator', 'lesson', 100),
-  ('lesson_squaring_numbers', 'Square Dealer', 'Completed the Squaring Numbers lesson', 'Square', 'lesson', 100),
-  ('lesson_2by2_criss_cross', 'Criss-Cross Champion', 'Completed the 2×2 Criss-Cross lesson', 'Hash', 'lesson', 150),
-  ('lesson_phonetic_code', 'Memory Encoder', 'Completed the Phonetic Code lesson', 'Brain', 'lesson', 75),
-  ('lesson_mental_workspace', 'Mental Architect', 'Completed the Mental Workspace lesson', 'Cpu', 'lesson', 75),
-  ('lesson_day_of_week', 'Time Traveler', 'Completed the Day of the Week lesson', 'Calendar', 'lesson', 100),
-  ('lesson_multiples_11', 'Eleven Master', 'Completed the Multiply by 11 lesson', 'Zap', 'lesson', 75);
+  ('lesson_2by1_multiplication', 'Two-by-One Pro', 'Completed the 2×1 Multiplication lesson', 'Grid3X3', 'lesson', 50),
+  ('lesson_3by1_multiplication', 'Triple Threat', 'Completed the 3×1 Multiplication lesson', 'Calculator', 'lesson', 50),
+  ('lesson_squaring_numbers', 'Square Dealer', 'Completed the Squaring Numbers lesson', 'Square', 'lesson', 50),
+  ('lesson_2by2_criss_cross', 'Criss-Cross Champion', 'Completed the 2×2 Criss-Cross lesson', 'Hash', 'lesson', 50),
+  ('lesson_phonetic_code', 'Memory Encoder', 'Completed the Phonetic Code lesson', 'Brain', 'lesson', 50),
+  ('lesson_mental_workspace', 'Mental Architect', 'Completed the Mental Workspace lesson', 'Cpu', 'lesson', 50),
+  ('lesson_day_of_week', 'Time Traveler', 'Completed the Day of the Week lesson', 'Calendar', 'lesson', 50),
+  ('lesson_multiples_11', 'Eleven Master', 'Completed the Multiply by 11 lesson', 'Zap', 'lesson', 50);
 
 -- Mathlympics Milestone Badges
 INSERT INTO public.badges (id, name, description, icon, category, xp_reward) VALUES
-  ('mathlympics_first_session', 'First Steps', 'Completed your first Mathlympics session', 'Flag', 'mathlympics', 25),
-  ('mathlympics_2x1_perfect', 'Perfect 2×1', 'Scored 100% on a 2×1 set', 'Star', 'mathlympics', 100),
-  ('mathlympics_3x1_perfect', 'Perfect 3×1', 'Scored 100% on a 3×1 set', 'Star', 'mathlympics', 150),
-  ('mathlympics_2x2_perfect', 'Perfect 2×2', 'Scored 100% on a 2×2 set', 'Star', 'mathlympics', 200),
-  ('mathlympics_squaring_perfect', 'Perfect Squarer', 'Scored 100% on a Squaring set', 'Star', 'mathlympics', 200),
-  ('mathlympics_speed_demon', 'Speed Demon', 'Averaged under 5 seconds per question', 'Zap', 'mathlympics', 150),
-  ('mathlympics_40_set', 'Marathon Mind', 'Completed a 40-question set', 'Target', 'mathlympics', 100);
+  ('mathlympics_first_session', 'First Steps', 'Completed your first Mathlympics session', 'Flag', 'mathlympics', 10),
+  ('mathlympics_2x1_perfect', 'Perfect 2×1', 'Scored 100% on a 2×1 set', 'Star', 'mathlympics', 10),
+  ('mathlympics_3x1_perfect', 'Perfect 3×1', 'Scored 100% on a 3×1 set', 'Star', 'mathlympics', 10),
+  ('mathlympics_2x2_perfect', 'Perfect 2×2', 'Scored 100% on a 2×2 set', 'Star', 'mathlympics', 10),
+  ('mathlympics_squaring_perfect', 'Perfect Squarer', 'Scored 100% on a Squaring set', 'Star', 'mathlympics', 10),
+  ('mathlympics_speed_demon', 'Speed Demon', 'Averaged under 5 seconds per question', 'Zap', 'mathlympics', 50),
+  ('mathlympics_40_set', 'Marathon Mind', 'Completed a 40-question set', 'Target', 'mathlympics', 50);
+
+-- Competitive Top 3 Badges (200 XP each)
+INSERT INTO public.badges (id, name, description, icon, category, xp_reward) VALUES
+  ('medal_gold', 'Gold Medal', 'Reached #1 on a category leaderboard', 'Trophy', 'milestone', 200),
+  ('medal_silver', 'Silver Medal', 'Reached #2 on a category leaderboard', 'Award', 'milestone', 200),
+  ('medal_bronze', 'Bronze Medal', 'Reached #3 on a category leaderboard', 'Medal', 'milestone', 200);
 
 -- General Milestone Badges
 INSERT INTO public.badges (id, name, description, icon, category, xp_reward) VALUES

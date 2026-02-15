@@ -55,6 +55,9 @@ export const useLessonsStore = defineStore('lessons', () => {
 
     async function markComplete(userId, lessonId, quizScore) {
         try {
+            // Find lesson to get badge_id
+            const lesson = lessons.value.find(l => l.id === lessonId)
+
             const { data, error } = await supabase
                 .from('user_lesson_progress')
                 .upsert({
@@ -67,6 +70,21 @@ export const useLessonsStore = defineStore('lessons', () => {
                 .select()
                 .single()
             if (error) throw error
+
+            // Award Lesson Badge and 50 XP
+            if (lesson && lesson.badge_id) {
+                await supabase.from('user_badges').insert({
+                    user_id: userId,
+                    badge_id: lesson.badge_id
+                })
+            }
+
+            // Award 50 XP
+            const { data: profile } = await supabase.from('profiles').select('xp').eq('id', userId).single()
+            if (profile) {
+                await supabase.from('profiles').update({ xp: (profile.xp || 0) + 50 }).eq('id', userId)
+            }
+
             progress.value[lessonId] = data
             return { data, error: null }
         } catch (error) {

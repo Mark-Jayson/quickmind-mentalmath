@@ -5,6 +5,7 @@
     v-bind="$attrs"
   >
     <span v-if="loading" class="qm-btn-spinner" />
+    <component :is="icon" v-if="icon && !loading" class="qm-btn-icon" :size="size === 'sm' ? 14 : size === 'lg' ? 20 : 18" />
     <slot />
   </button>
 </template>
@@ -16,6 +17,7 @@ defineProps({
   loading: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
   block: { type: Boolean, default: false },
+  icon: { type: [Object, Function], default: null },
 })
 </script>
 

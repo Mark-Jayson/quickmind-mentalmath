@@ -92,6 +92,8 @@ const categoryOptions = [
   { id: '3x1', label: '3×1' },
   { id: '2x2', label: '2×2' },
   { id: 'squaring', label: 'Squaring' },
+  { id: 'multiples_11', label: '×11' },
+  { id: 'day_of_week', label: 'Calendar' },
 ]
 
 function formatTime(ms) {

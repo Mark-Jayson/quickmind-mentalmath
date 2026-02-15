@@ -7,6 +7,17 @@
         <hr class="plasma-line" />
       </div>
 
+      <div class="social-login">
+        <QmButton variant="outline" block :loading="loading" @click="handleGoogleLogin">
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="social-icon" />
+          Sign up with Google
+        </QmButton>
+      </div>
+
+      <div class="divider">
+        <span>OR</span>
+      </div>
+
       <div v-if="success" class="success-msg">
         <p>✓ Account created! Check your email to confirm, then <router-link to="/login" class="auth-link">sign in</router-link>.</p>
       </div>
@@ -87,6 +98,19 @@ async function handleSignup() {
     loading.value = false
   }
 }
+
+async function handleGoogleLogin() {
+  serverError.value = ''
+  loading.value = true
+  try {
+    const { error } = await authStore.signInWithOAuth()
+    if (error) throw error
+    // Redirect happens automatically by Supabase
+  } catch (err) {
+    serverError.value = err.message || 'Google sign up failed'
+    loading.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -160,4 +184,41 @@ async function handleSignup() {
 }
 
 .auth-link:hover { text-decoration: underline; }
+
+.social-login {
+  margin-bottom: 1.5rem;
+}
+
+.social-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 0.5rem;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+  color: var(--color-subtext);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.divider::before {
+  margin-right: 1em;
+}
+
+.divider::after {
+  margin-left: 1em;
+}
 </style>

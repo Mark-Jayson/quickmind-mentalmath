@@ -44,6 +44,24 @@ export function useQuestionGenerator() {
                 isTextAnswer: true
             }
         },
+        'addition': () => {
+            const a = randInt(100, 999)
+            const b = randInt(100, 999)
+            return { a, b, answer: a + b, display: `${a} + ${b}` }
+        },
+        'phonetic_code': () => {
+            // Mapping for phonetic code practice
+            const map = {
+                0: 'S, Z', 1: 'T, D', 2: 'N', 3: 'M', 4: 'R',
+                5: 'L', 6: 'CH, SH, J', 7: 'K, G', 8: 'F, V', 9: 'P, B'
+            }
+            const digit = Math.floor(Math.random() * 10)
+            return {
+                answer: digit.toString(),
+                display: `Which digit maps to: ${map[digit]}?`,
+                isTextAnswer: true
+            }
+        },
         'multiples_11': () => {
             const a = randInt(10, 90)
             return { a, b: 11, answer: a * 11, display: `${a} × 11` }
