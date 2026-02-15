@@ -1,5 +1,5 @@
 from fastapi import HTTPException, Request
-from ._lib.supabase import get_supabase
+from .supabase import get_supabase
 
 
 async def get_current_user(request: Request) -> dict:

@@ -59,6 +59,13 @@
         @complete="completeLesson" 
       />
     </div>
+
+    <!-- Badge Overlay -->
+    <BadgeAwardOverlay 
+      v-if="showBadgeOverlay && newBadges.length > 0" 
+      :badge="newBadges[0]" 
+      @close="handleOverlayClose" 
+    />
   </div>
 </template>
 
@@ -68,6 +75,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, ArrowRight, Check, Zap } from 'lucide-vue-next'
 import QmButton from '@/components/ui/QmButton.vue'
 import LessonQuiz from '@/components/features/LessonQuiz.vue'
+import BadgeAwardOverlay from '@/components/features/BadgeAwardOverlay.vue'
 import { useLessonsStore } from '@/stores/lessons'
 import { useAuthStore } from '@/stores/auth'
 
@@ -77,6 +85,8 @@ const lessonsStore = useLessonsStore()
 const authStore = useAuthStore()
 const currentStep = ref(0)
 const showQuiz = ref(false)
+const newBadges = ref([])
+const showBadgeOverlay = ref(false)
 
 const lessonsDB = {
   left_to_right_addition: {
@@ -188,9 +198,20 @@ const lessonData = computed(() => {
 
 async function completeLesson(quizScore) {
   if (authStore.user) {
-    await lessonsStore.markComplete(authStore.user.id, route.params.id, quizScore)
+    const result = await lessonsStore.markComplete(authStore.user.id, route.params.id, quizScore)
     await authStore.fetchProfile() // Ensure XP reflects in header
+    
+    if (result.new_badges && result.new_badges.length > 0) {
+      newBadges.value = result.new_badges
+      showBadgeOverlay.value = true
+      return // Wait for overlay close to redirect
+    }
   }
+  router.push('/curriculum')
+}
+
+function handleOverlayClose() {
+  showBadgeOverlay.value = false
   router.push('/curriculum')
 }
 </script>

@@ -52,22 +52,28 @@ async def complete_lesson(request: Request):
         .execute()
     )
 
+    new_badges = []
     if lesson.data and lesson.data.get("badge_id"):
         badge_id = lesson.data["badge_id"]
-        try:
+        # Check if already earned
+        existing = supabase.table("user_badges").select("id").eq("user_id", user["id"]).eq("badge_id", badge_id).single().execute()
+        
+        if not existing.data:
             supabase.table("user_badges").insert({
                 "user_id": user["id"],
                 "badge_id": badge_id,
             }).execute()
 
             # Award XP
-            badge = supabase.table("badges").select("xp_reward").eq("id", badge_id).single().execute()
+            badge = supabase.table("badges").select("*").eq("id", badge_id).single().execute()
             if badge.data:
                 xp = badge.data.get("xp_reward", 0)
                 profile = supabase.table("profiles").select("xp").eq("id", user["id"]).single().execute()
                 current_xp = profile.data.get("xp", 0) if profile.data else 0
                 supabase.table("profiles").update({"xp": current_xp + xp}).eq("id", user["id"]).execute()
-        except Exception:
-            pass  # Already earned
+                new_badges.append(badge.data)
 
-    return JSONResponse(result.data[0] if result.data else {}, status_code=201)
+    response_data = result.data[0] if result.data else {}
+    response_data["new_badges"] = new_badges
+    
+    return JSONResponse(response_data, status_code=201)

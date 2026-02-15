@@ -31,9 +31,12 @@ async def submit_session(request: Request):
     )
 
     # Check for milestone badges
-    await check_milestones(supabase, user["id"], session)
+    new_badges = await check_milestones(supabase, user["id"], session)
 
-    return JSONResponse(result.data[0] if result.data else {}, status_code=201)
+    response_data = result.data[0] if result.data else {}
+    response_data["new_badges"] = new_badges
+
+    return JSONResponse(response_data, status_code=201)
 
 
 async def check_milestones(supabase, user_id: str, session: SessionSubmit):
@@ -66,21 +69,28 @@ async def check_milestones(supabase, user_id: str, session: SessionSubmit):
 
     # Award badges (ignore duplicates via upsert)
     xp_earned = 0
+    new_badges = []
+
     for badge_id in badges_to_award:
-        try:
+        # Check if already earned
+        existing = supabase.table("user_badges").select("id").eq("user_id", user_id).eq("badge_id", badge_id).single().execute()
+        
+        if not existing.data:
             supabase.table("user_badges").insert({
                 "user_id": user_id,
                 "badge_id": badge_id,
             }).execute()
 
-            badge = supabase.table("badges").select("xp_reward").eq("id", badge_id).single().execute()
+            # Get badge details for response and XP
+            badge = supabase.table("badges").select("*").eq("id", badge_id).single().execute()
             if badge.data:
                 xp_earned += badge.data.get("xp_reward", 0)
-        except Exception:
-            pass  # Badge already earned
+                new_badges.append(badge.data)
 
     # Update XP
     if xp_earned > 0:
         profile = supabase.table("profiles").select("xp").eq("id", user_id).single().execute()
         current_xp = profile.data.get("xp", 0) if profile.data else 0
         supabase.table("profiles").update({"xp": current_xp + xp_earned}).eq("id", user_id).execute()
+        
+    return new_badges

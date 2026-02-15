@@ -72,10 +72,9 @@ export const useMathlympicsStore = defineStore('mathlympics', () => {
     }
 
     async function saveSession() {
-        if (!authStore.user) return
+        if (!authStore.user) return { new_badges: [] }
 
         const sessionData = {
-            user_id: authStore.user.id,
             category: category.value,
             set_size: setSize.value,
             score: score.value,
@@ -85,93 +84,30 @@ export const useMathlympicsStore = defineStore('mathlympics', () => {
             detail: results.value,
         }
 
-        const { error } = await supabase.from('mathlympics_sessions').insert(sessionData)
-        if (error) {
-            console.error('Failed to save session:', error)
-            return
-        }
+        try {
+            const { data: { session } } = await supabase.auth.getSession()
+            const token = session?.access_token
 
-        // Award base 2 XP for completing a session
-        await awardXP(2)
-
-        // Check for milestones and competitive badges
-        await checkBadges()
-        await checkTop3()
-    }
-
-    async function awardXP(amount) {
-        if (!authStore.user) return
-        const { data: profile } = await supabase.from('profiles').select('xp').eq('id', authStore.user.id).single()
-        if (profile) {
-            await supabase.from('profiles').update({ xp: (profile.xp || 0) + amount }).eq('id', authStore.user.id)
-            await authStore.fetchProfile() // Sync UI
-        }
-    }
-
-    async function checkTop3() {
-        if (!authStore.user) return
-
-        // Query top 3 for current category and size
-        const { data: top3, error } = await supabase
-            .from('mathlympics_sessions')
-            .select('user_id')
-            .eq('category', category.value)
-            .eq('set_size', setSize.value)
-            .order('accuracy', { ascending: false })
-            .order('total_time_ms', { ascending: true })
-            .limit(3)
-
-        if (error || !top3) return
-
-        const rank = top3.findIndex(s => s.user_id === authStore.user.id) + 1
-        let badgeId = null
-        if (rank === 1) badgeId = 'medal_gold'
-        else if (rank === 2) badgeId = 'medal_silver'
-        else if (rank === 3) badgeId = 'medal_bronze'
-
-        if (badgeId) {
-            const { error: badgeError } = await supabase.from('user_badges').insert({
-                user_id: authStore.user.id,
-                badge_id: badgeId
+            const response = await fetch('/api/mathlympics/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(sessionData)
             })
-            if (!badgeError) {
-                await awardXP(200) // Top 3 reward
-            }
-        }
-    }
 
-    async function checkBadges() {
-        if (!authStore.user) return
-        const newBadges = []
-
-        // First session check
-        const { count } = await supabase.from('mathlympics_sessions').select('*', { count: 'exact', head: true }).eq('user_id', authStore.user.id)
-        if (count === 1) newBadges.push('mathlympics_first_session')
-
-        // Perfect scores (Mastery)
-        if (accuracy.value === 1) {
-            if (category.value === '2x1') newBadges.push('mathlympics_2x1_perfect')
-            if (category.value === '3x1') newBadges.push('mathlympics_3x1_perfect')
-            if (category.value === '2x2') newBadges.push('mathlympics_2x2_perfect')
-            if (category.value === 'squaring') newBadges.push('mathlympics_squaring_perfect')
-        }
-
-        // Speed demon
-        if (avgTimeMs.value < 5000) newBadges.push('mathlympics_speed_demon')
-
-        // Marathon
-        if (setSize.value === 40) newBadges.push('mathlympics_40_set')
-
-        for (const badgeId of newBadges) {
-            const { error } = await supabase.from('user_badges').insert({ user_id: authStore.user.id, badge_id: badgeId })
-            if (!error) {
-                // Award XP based on badge type
-                if (badgeId.includes('perfect') || badgeId === 'mathlympics_first_session') {
-                    await awardXP(10)
-                } else if (badgeId === 'mathlympics_speed_demon' || badgeId === 'mathlympics_40_set') {
-                    await awardXP(50)
-                }
-            }
+            if (!response.ok) throw new Error('Failed to submit session')
+            
+            const result = await response.json()
+            
+            // Sync profile XP
+            await authStore.fetchProfile()
+            
+            return { new_badges: result.new_badges || [] }
+        } catch (error) {
+            console.error('Session submit error:', error)
+            return { new_badges: [] }
         }
     }
 
@@ -181,11 +117,25 @@ export const useMathlympicsStore = defineStore('mathlympics', () => {
         lapTimes.value.push(now - lapStart.value)
         lapStart.value = now
         currentIndex.value++
+    }
 
+    async function submitSession() {
         if (currentIndex.value >= questions.value.length) {
             state.value = 'reviewing'
-            saveSession()
+            return await saveSession()
         }
+        return { new_badges: [] }
+    }
+
+    function submitAnswer(answer) {
+        const now = Date.now()
+        answers.value.push(answer)
+        lapTimes.value.push(now - lapStart.value)
+        lapStart.value = now
+        currentIndex.value++
+        
+        // State update derived from submitSession check in view or separate watcher?
+        // Actually, let's keep it simple. The view should check isComplete.
     }
 
     function reset() {
@@ -217,6 +167,7 @@ export const useMathlympicsStore = defineStore('mathlympics', () => {
         configure,
         startGame,
         submitAnswer,
+        submitSession,
         reset,
     }
 })

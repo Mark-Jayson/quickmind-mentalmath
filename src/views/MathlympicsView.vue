@@ -103,6 +103,7 @@
 
     <!-- REVIEWING STATE -->
     <div v-else-if="store.state === 'reviewing'" class="review-page">
+      <!-- ... existing review content ... -->
       <header class="review-header">
         <p class="review-tag">RESULTS</p>
         <h1 class="review-score">
@@ -159,6 +160,13 @@
           Change Settings
         </QmButton>
       </div>
+
+      <!-- Badge Overlay -->
+      <BadgeAwardOverlay 
+        v-if="showBadgeOverlay && newBadges.length > 0" 
+        :badge="newBadges[0]" 
+        @close="closeOverlay" 
+      />
     </div>
   </div>
 </template>
@@ -169,6 +177,7 @@ import { useMathlympicsStore } from '@/stores/mathlympics'
 import { useTimer } from '@/composables/useTimer'
 import QmButton from '@/components/ui/QmButton.vue'
 import QmTimer from '@/components/ui/QmTimer.vue'
+import BadgeAwardOverlay from '@/components/features/BadgeAwardOverlay.vue'
 import { Play, ArrowRight, X, CheckCircle, XCircle, RotateCcw } from 'lucide-vue-next'
 
 const store = useMathlympicsStore()
@@ -178,6 +187,8 @@ const selectedCategory = ref('2x2')
 const selectedSize = ref(10)
 const currentAnswer = ref('')
 const answerInput = ref(null)
+const newBadges = ref([])
+const showBadgeOverlay = ref(false)
 
 const categoryOptions = [
   { id: '2x1', title: '2 × 1 Digit', example: '47 × 8', tag: 'Beginner' },
@@ -231,8 +242,9 @@ function submitAnswer(val) {
   store.submitAnswer(answerToSubmit)
   currentAnswer.value = ''
   
-  if (store.state === 'reviewing') {
+  if (store.currentIndex >= store.questions.length) {
     timer.stop()
+    handleSessionEnd()
   } else {
     // Only focus input if it exists (not for button mode)
     nextTick(() => {
@@ -241,6 +253,20 @@ function submitAnswer(val) {
        }
     })
   }
+}
+
+async function handleSessionEnd() {
+  const result = await store.submitSession()
+  if (result.new_badges && result.new_badges.length > 0) {
+    newBadges.value = result.new_badges
+    showBadgeOverlay.value = true
+  }
+}
+
+function closeOverlay() {
+  showBadgeOverlay.value = false
+  // If multiple badges, maybe show next? For now just close.
+  // We stay on review page
 }
 
 function quitGame() { timer.stop(); store.reset() }
@@ -452,6 +478,8 @@ onUnmounted(() => { timer.stop() })
   outline: none;
   transition: border-color 0.2s;
   -moz-appearance: textfield;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .answer-input::-webkit-outer-spin-button,
