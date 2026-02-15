@@ -39,7 +39,7 @@ const iconComponent = computed(() => {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: var(--color-background);
+  background: var(--color-workshop);
   border: 2px solid var(--color-border-light);
   cursor: help;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -78,7 +78,7 @@ const iconComponent = computed(() => {
   font-weight: 800;
   padding: 0.15rem 0.4rem;
   border-radius: 10px;
-  border: 2px solid var(--color-background);
+  border: 2px solid var(--color-workshop);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 

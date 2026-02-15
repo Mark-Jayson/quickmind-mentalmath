@@ -5,9 +5,23 @@ import { supabase } from '@/lib/supabase'
 export const useProfileStore = defineStore('profile', () => {
     const profile = ref(null)
     const badges = ref([])
+    const allBadges = ref([])
     const loading = ref(false)
 
     const xp = computed(() => profile.value?.xp ?? 0)
+
+    async function fetchAllBadges() {
+        try {
+            const { data, error } = await supabase
+                .from('badges')
+                .select('*')
+                .order('category')
+            if (error) throw error
+            allBadges.value = data ?? []
+        } catch (err) {
+            console.error('All badges fetch error:', err)
+        }
+    }
 
     async function fetchProfile(userId) {
         loading.value = true
@@ -62,5 +76,5 @@ export const useProfileStore = defineStore('profile', () => {
         }
     }
 
-    return { profile, badges, loading, xp, fetchProfile, fetchBadges, updateProfile }
+    return { profile, badges, allBadges, loading, xp, fetchProfile, fetchBadges, fetchAllBadges, updateProfile }
 })

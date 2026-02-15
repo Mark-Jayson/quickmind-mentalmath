@@ -61,7 +61,13 @@
           </div>
         </div>
         <div class="col">
-          <h2 class="section-title">Badges Earned</h2>
+          <div class="section-header-flex">
+            <h2 class="section-title">Badges Earned</h2>
+            <button class="learn-badges-btn" @click="showBadgesOverlay = true">
+              <component :is="Info" :size="14" />
+              Learn about Badges
+            </button>
+          </div>
           <div v-if="groupedBadges.length === 0" class="placeholder-card">
             <component :is="Award" :size="20" class="placeholder-icon" />
             <p>Complete lessons and challenges to earn badges.</p>
@@ -76,6 +82,9 @@
         </div>
       </div>
     </section>
+
+    <!-- Overlays -->
+    <BadgesOverlay v-if="showBadgesOverlay" @close="showBadgesOverlay = false" />
   </div>
 </template>
 
@@ -84,12 +93,14 @@ import { onMounted, computed, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useProfileStore } from '@/stores/profile'
 import { supabase } from '@/lib/supabase'
-import { Zap, Timer, BookOpen, Trophy, Activity, Award } from 'lucide-vue-next'
+import { Zap, Timer, BookOpen, Trophy, Activity, Award, Info } from 'lucide-vue-next'
 import BadgeItem from '@/components/features/BadgeItem.vue'
+import BadgesOverlay from '@/components/features/BadgesOverlay.vue'
 
 const authStore = useAuthStore()
 const profileStore = useProfileStore()
 const recentSessions = ref([])
+const showBadgesOverlay = ref(false)
 
 onMounted(async () => {
   if (authStore.user) {
@@ -185,7 +196,34 @@ const groupedBadges = computed(() => {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-subtext);
+  margin-bottom: 0;
+}
+
+.section-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
+}
+
+.learn-badges-btn {
+  background: none;
+  border: none;
+  color: var(--color-plasma);
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.learn-badges-btn:hover {
+  background: var(--color-plasma-soft);
+  color: var(--color-plasma-dim);
 }
 
 /* Quick Actions */
