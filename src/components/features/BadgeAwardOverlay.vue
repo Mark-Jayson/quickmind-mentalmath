@@ -32,7 +32,7 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
 import confetti from 'canvas-confetti'
-import BadgeItem from '@/components/common/BadgeItem.vue'
+import BadgeItem from '@/components/features/BadgeItem.vue'
 
 const props = defineProps({
   badge: {
