@@ -30,6 +30,24 @@ export function useQuestionGenerator() {
             const a = randInt(10, 99)
             return { a, b: a, answer: a * a, display: `${a}²` }
         },
+        'day_of_week': () => {
+            const start = new Date(1950, 0, 1)
+            const end = new Date(2050, 11, 31)
+            const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+            // Format date as "Jan 1, 2000" or similar readable format
+            const options = { year: 'numeric', month: 'long', day: 'numeric' }
+            return {
+                answer: days[date.getDay()],
+                display: date.toLocaleDateString('en-US', options),
+                isTextAnswer: true
+            }
+        },
+        'multiples_11': () => {
+            const a = randInt(10, 90)
+            return { a, b: 11, answer: a * 11, display: `${a} × 11` }
+        },
     }
 
     /**

@@ -126,6 +126,24 @@ const lessonsDB = {
       { title: 'Chunking Strategy', content: '<p>Your working memory can hold about 4 chunks. Instead of remembering individual digits, remember <strong>partial products</strong> as complete numbers.</p>', example: '<p><strong>46 × 73</strong>: Hold "2800 → 3340 → 3358" not "4, 6, 7, 3, 28, 42, 12..."</p>' },
     ],
   },
+  multiples_11: {
+    title: 'Multiply by 11',
+    description: 'Quickly multiply 2-digit numbers by 11 using the "Sandwich" method.',
+    steps: [
+      { title: 'The Sandwich Method', content: '<p>To multiply any 2-digit number by 11, simply <strong>add the two digits together</strong> and place the sum in the middle.</p><p>Think of it as pulling the two digits apart and sandwiching their sum between them.</p>', example: '<p><strong>35 × 11</strong></p><p>3 + 5 = 8</p><p>Result: <strong>385</strong></p>' },
+      { title: 'Handling Carries', content: '<p>What if the sum is greater than 9? You simply <strong>carry the 1</strong> over to the left digit.</p><p>The right digit stays the same, the middle digit is the ones place of the sum, and the left digit increases by one.</p>', example: '<p><strong>85 × 11</strong></p><p>8 + 5 = 13 (Carry the 1)</p><p>8 + 1 = 9</p><p>Result: <strong>935</strong></p>' },
+    ],
+  },
+  day_of_week: {
+    title: 'Day of the Week',
+    description: 'Determine the day of the week for any date using the Doomsday Algorithm.',
+    steps: [
+      { title: 'The Doomsday Concept', content: '<p>Every year has a specific day of the week called its <strong>Doomsday</strong>. Easy-to-remember dates (like 4/4, 6/6, 8/8, 10/10, 12/12) always fall on this same day.</p><p>Once you know the year\'s Doomsday, you can find any other date relative to it.</p>', example: '<p><strong>2026 Doomsday: Saturday</strong></p><p>Since 4/4 is a Doomsday, April 4, 2026 is a Saturday.</p>' },
+      { title: 'Memorizing the Anchors', content: '<p>Memorize these date anchors that always fall on the Doomsday:</p><ul><li><strong>Even Months:</strong> 4/4, 6/6, 8/8, 10/10, 12/12</li><li><strong>"Work 9 to 5"</strong>: 5/9 and 9/5</li><li><strong>"7-11 Store"</strong>: 7/11 and 11/7</li><li><strong>Leap Years:</strong> Jan 4, Feb 29 (otherwise Jan 3, Feb 28)</li><li><strong>"Valentine\'s"</strong>: Feb 14 (or last day of Feb)</li></ul>', example: '<p>If Doomsday is Saturday:</p><p>August 8 (8/8) is Saturday.</p><p>December 12 (12/12) is Saturday.</p><p>July 11 (7/11) is Saturday.</p>' },
+      { title: 'Finding the Day', content: '<p>To find the day for any date:</p><ol><li>Find the closest anchor date.</li><li>Calculate the difference in days.</li><li>Add (or subtract) that difference to the Doomsday.</li></ol>', example: '<p><strong>Find July 4, 2026 (Doomsday = Saturday)</strong></p><p>Closest anchor: <strong>July 11 (7/11)</strong> is a Saturday.</p><p>Difference: 4 is <strong>7 days before</strong> 11.</p><p>Saturday minus 7 days = <strong>Saturday</strong>.</p>' },
+      { title: 'Century Codes', content: '<p>For other years, calculate the Doomsday:</p><p><strong>Century Code + Year + (Year/4)</strong></p><p>Codes: 1900s=Wednesday, 2000s=Tuesday, 2100s=Sunday</p>', example: '<p><strong>Doomsday 2026?</strong></p><p>Base: Tuesday (2000s)</p><p>Year: 26</p><p>Leap Years: 26/4 = 6</p><p>Sum: Tue + 26 + 6 = Tue + 32</p><p>32 mod 7 = 4</p><p>Tuesday + 4 days = <strong>Saturday</strong></p>' },
+    ],
+  },
 }
 
 const lessonData = computed(() => {

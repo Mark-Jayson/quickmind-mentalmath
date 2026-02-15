@@ -56,7 +56,8 @@ export const useAuthStore = defineStore('auth', () => {
                 email,
                 password,
                 options: {
-                    data: { username }
+                    data: { username },
+                    emailRedirectTo: window.location.origin
                 }
             })
             if (error) throw error

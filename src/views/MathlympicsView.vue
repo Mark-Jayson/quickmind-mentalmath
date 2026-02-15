@@ -30,7 +30,7 @@
           <h3 class="config-label">Questions</h3>
           <div class="size-options">
             <button
-              v-for="size in [10, 20, 40]"
+              v-for="size in availableSizes"
               :key="size"
               :class="['size-btn', { 'size-btn--active': selectedSize === size }]"
               @click="selectedSize = size"
@@ -72,7 +72,19 @@
           <div class="question-display">{{ store.currentQuestion?.display }}</div>
         </div>
 
-        <form @submit.prevent="submitAnswer" class="answer-form">
+        <div v-if="selectedCategory === 'day_of_week'" class="day-options">
+          <QmButton
+            v-for="day in ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']"
+            :key="day"
+            variant="outline"
+            class="day-btn"
+            @click="submitAnswer(day)"
+          >
+            {{ day.slice(0, 3) }}
+          </QmButton>
+        </div>
+
+        <form v-else @submit.prevent="() => submitAnswer()" class="answer-form">
           <input
             ref="answerInput"
             v-model="currentAnswer"
@@ -80,7 +92,7 @@
             class="answer-input"
             placeholder="?"
             autofocus
-            @keydown.enter="submitAnswer"
+            @keydown.enter="() => submitAnswer()"
           />
           <QmButton type="submit" variant="primary" size="lg">
             <component :is="ArrowRight" :size="18" />
@@ -152,7 +164,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onUnmounted } from 'vue'
+import { ref, nextTick, onUnmounted, watch, computed } from 'vue'
 import { useMathlympicsStore } from '@/stores/mathlympics'
 import { useTimer } from '@/composables/useTimer'
 import QmButton from '@/components/ui/QmButton.vue'
@@ -172,10 +184,31 @@ const categoryOptions = [
   { id: '3x1', title: '3 × 1 Digit', example: '632 × 7', tag: 'Intermediate' },
   { id: '2x2', title: '2 × 2 Digit', example: '46 × 73', tag: 'Advanced' },
   { id: 'squaring', title: 'Squaring', example: '67²', tag: 'Specialist' },
+  { id: 'multiples_11', title: 'Multiples of 11', example: '43 × 11', tag: 'Trick' },
+  { id: 'day_of_week', title: 'Day of Week', example: 'Jan 1', tag: 'Calendar' },
 ]
 
-const categoryLabels = { '2x1': '2×1', '3x1': '3×1', '2x2': '2×2', 'squaring': 'Squaring' }
+const categoryLabels = { 
+  '2x1': '2×1', 
+  '3x1': '3×1', 
+  '2x2': '2×2', 
+  'squaring': 'Squaring',
+  'multiples_11': '×11',
+  'day_of_week': 'Calendar'
+}
 const categoryLabel = ref('')
+
+const availableSizes = computed(() => {
+  if (selectedCategory.value === 'multiples_11') return [20, 40]
+  return [10, 20, 40]
+})
+
+// Watch for category change to reset invalid size
+watch(selectedCategory, (newCat) => {
+  if (newCat === 'multiples_11' && selectedSize.value === 10) {
+    selectedSize.value = 20
+  }
+})
 
 function startGame() {
   store.configure(selectedCategory.value, selectedSize.value)
@@ -186,14 +219,27 @@ function startGame() {
   nextTick(() => answerInput.value?.focus())
 }
 
-function submitAnswer() {
-  if (currentAnswer.value === '') return
-  store.submitAnswer(parseInt(currentAnswer.value, 10))
+function submitAnswer(val) {
+  let answerToSubmit = val
+  
+  if (answerToSubmit === undefined) {
+    // Input submission
+    if (currentAnswer.value === '') return
+    answerToSubmit = parseInt(currentAnswer.value, 10)
+  }
+
+  store.submitAnswer(answerToSubmit)
   currentAnswer.value = ''
+  
   if (store.state === 'reviewing') {
     timer.stop()
   } else {
-    nextTick(() => answerInput.value?.focus())
+    // Only focus input if it exists (not for button mode)
+    nextTick(() => {
+       if (selectedCategory.value !== 'day_of_week') {
+         answerInput.value?.focus()
+       }
+    })
   }
 }
 
@@ -476,5 +522,17 @@ onUnmounted(() => { timer.stop() })
 @media (max-width: 768px) {
   .question-display { font-size: 3rem; }
   .review-stats { gap: 1.5rem; }
+}
+
+.day-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  max-width: 600px;
+}
+.day-btn {
+  min-width: 60px;
+  font-weight: 700;
 }
 </style>

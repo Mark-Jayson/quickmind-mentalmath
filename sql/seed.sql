@@ -11,7 +11,9 @@ INSERT INTO public.badges (id, name, description, icon, category, xp_reward) VAL
   ('lesson_squaring_numbers', 'Square Dealer', 'Completed the Squaring Numbers lesson', 'Square', 'lesson', 100),
   ('lesson_2by2_criss_cross', 'Criss-Cross Champion', 'Completed the 2×2 Criss-Cross lesson', 'Hash', 'lesson', 150),
   ('lesson_phonetic_code', 'Memory Encoder', 'Completed the Phonetic Code lesson', 'Brain', 'lesson', 75),
-  ('lesson_mental_workspace', 'Mental Architect', 'Completed the Mental Workspace lesson', 'Cpu', 'lesson', 75);
+  ('lesson_mental_workspace', 'Mental Architect', 'Completed the Mental Workspace lesson', 'Cpu', 'lesson', 75),
+  ('lesson_day_of_week', 'Time Traveler', 'Completed the Day of the Week lesson', 'Calendar', 'lesson', 100),
+  ('lesson_multiples_11', 'Eleven Master', 'Completed the Multiply by 11 lesson', 'Zap', 'lesson', 75);
 
 -- Mathlympics Milestone Badges
 INSERT INTO public.badges (id, name, description, icon, category, xp_reward) VALUES
@@ -37,4 +39,6 @@ INSERT INTO public.lessons (id, title, description, category, sort_order, badge_
   ('squaring_numbers', 'Squaring Numbers', 'Use the a²−b² identity trick.', 'multiplication', 5, 'lesson_squaring_numbers', '{"steps": 2}'::jsonb),
   ('2by2_criss_cross', '2-Digit × 2-Digit (Criss-Cross)', 'The criss-cross multiplication method.', 'multiplication', 6, 'lesson_2by2_criss_cross', '{"steps": 1}'::jsonb),
   ('phonetic_code', 'The Phonetic Code', 'Convert numbers to sounds for memory.', 'memory', 7, 'lesson_phonetic_code', '{"steps": 1}'::jsonb),
-  ('mental_workspace', 'Mental Workspace Management', 'Strategies for holding intermediate results.', 'memory', 8, 'lesson_mental_workspace', '{"steps": 1}'::jsonb);
+  ('mental_workspace', 'Mental Workspace Management', 'Strategies for holding intermediate results.', 'memory', 8, 'lesson_mental_workspace', '{"steps": 1}'::jsonb),
+  ('day_of_week', 'Day of the Week', 'Calculate the day of the week for any date.', 'calendar', 9, 'lesson_day_of_week', '{"steps": 1}'::jsonb),
+  ('multiples_11', 'Multiply by 11', 'Quickly multiply 2-digit numbers by 11.', 'multiplication', 10, 'lesson_multiples_11', '{"steps": 1}'::jsonb);

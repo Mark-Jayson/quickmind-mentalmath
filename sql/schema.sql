@@ -58,7 +58,7 @@ CREATE TABLE public.user_lesson_progress (
 CREATE TABLE public.mathlympics_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  category TEXT NOT NULL CHECK (category IN ('2x1', '3x1', '2x2', 'squaring')),
+  category TEXT NOT NULL CHECK (category IN ('2x1', '3x1', '2x2', 'squaring', 'multiples_11', 'day_of_week')),
   set_size INTEGER NOT NULL CHECK (set_size IN (10, 20, 40)),
   score INTEGER NOT NULL,
   accuracy REAL NOT NULL,

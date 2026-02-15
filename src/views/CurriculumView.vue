@@ -39,40 +39,62 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { Plus, Grid3X3, Brain, CheckCircle, Circle, ChevronRight } from 'lucide-vue-next'
+import { onMounted, computed } from 'vue'
+import { useLessonsStore } from '@/stores/lessons'
+import { useAuthStore } from '@/stores/auth'
+import { Plus, Grid3X3, Brain, Calendar, CheckCircle, Circle, ChevronRight } from 'lucide-vue-next'
 
-const categories = ref([
-  {
-    key: 'addition',
-    label: 'Addition Techniques',
-    icon: Plus,
-    items: [
-      { id: 'left_to_right_addition', title: 'Left-to-Right Addition', description: 'Add numbers from left to right instead of right to left.', completed: false },
-      { id: 'complement_addition', title: 'Complements & Carries', description: 'Use complements of 10 to simplify mental carries.', completed: false },
-    ],
-  },
-  {
-    key: 'multiplication',
-    label: 'Multiplication Techniques',
-    icon: Grid3X3,
-    items: [
-      { id: '2by1_multiplication', title: '2-Digit × 1-Digit', description: 'Break apart the 2-digit number and multiply left-to-right.', completed: false },
-      { id: '3by1_multiplication', title: '3-Digit × 1-Digit', description: 'Extend left-to-right multiplication to 3-digit numbers.', completed: false },
-      { id: 'squaring_numbers', title: 'Squaring Numbers', description: 'Use the difference-of-squares identity to square any 2-digit number.', completed: false },
-      { id: '2by2_criss_cross', title: '2 × 2 Criss-Cross', description: 'The showpiece criss-cross method for multiplying 2-digit numbers.', completed: false },
-    ],
-  },
-  {
-    key: 'memory',
-    label: 'Memory & Strategy',
-    icon: Brain,
-    items: [
-      { id: 'phonetic_code', title: 'The Phonetic Code', description: 'Convert numbers to consonant sounds to create memorable words.', completed: false },
-      { id: 'mental_workspace', title: 'Mental Workspace Management', description: 'Strategies for holding intermediate values during calculations.', completed: false },
-    ],
-  },
-])
+const store = useLessonsStore()
+const authStore = useAuthStore()
+
+const categoryConfig = {
+  addition: { label: 'Addition Techniques', icon: Plus },
+  multiplication: { label: 'Multiplication Techniques', icon: Grid3X3 },
+  memory: { label: 'Memory & Strategy', icon: Brain },
+  calendar: { label: 'Calendar Secrets', icon: Calendar },
+}
+
+const categories = computed(() => {
+  const result = []
+  // Define custom sort order for categories
+  const order = ['addition', 'multiplication', 'memory', 'calendar']
+  
+  for (const key of order) {
+    if (store.categories[key]) {
+      const config = categoryConfig[key] || { label: key, icon: Circle }
+      result.push({
+        key,
+        label: config.label,
+        icon: config.icon,
+        items: store.categories[key].map(l => ({
+          ...l,
+          completed: store.progress[l.id]?.completed || false
+        }))
+      })
+    }
+  }
+  
+  // Add any other categories not in the explicit order
+  Object.keys(store.categories).forEach(key => {
+    if (!order.includes(key)) {
+      result.push({
+        key,
+        label: key.charAt(0).toUpperCase() + key.slice(1),
+        icon: Circle,
+        items: store.categories[key].map(l => ({ ...l, completed: store.progress[l.id]?.completed || false }))
+      })
+    }
+  })
+  
+  return result
+})
+
+onMounted(async () => {
+    await store.fetchLessons()
+    if (authStore.user) {
+        await store.fetchProgress(authStore.user.id)
+    }
+})
 </script>
 
 <style scoped>
