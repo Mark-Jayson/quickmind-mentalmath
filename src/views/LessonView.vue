@@ -99,10 +99,28 @@ const lessonsDB = {
   },
   squaring_numbers: {
     title: 'Squaring Numbers',
-    description: 'Use the difference-of-squares identity to square any 2-digit number.',
+    description: 'Master the art of squaring any 2-digit number using the "Difference of Squares" magic.',
     steps: [
-      { title: 'The Key Identity', content: '<p><strong>a² = (a + d)(a − d) + d²</strong></p><p>Choose <em>d</em> so that one factor becomes a round number (multiple of 10).</p>', example: '<p><strong>67²</strong> — d = 3 → 70 × 64 + 9 = <strong>4489</strong></p>' },
-      { title: 'Choosing d', content: '<p>Always round to the nearest multiple of 10. If the ones digit is ≤ 5, round down; if > 5, round up.</p>', example: '<p><strong>46²</strong>: (50)(42) + 16 = <strong>2116</strong></p><p><strong>83²</strong>: (86)(80) + 9 = <strong>6889</strong></p>' },
+      { 
+        title: 'The Magic Formula', 
+        content: '<p>Squaring a number like 47² in your head seems hard, right? But 50 × 44 is much easier!</p><p>We use a simple algebraic trick: <strong>a² = (a + d)(a − d) + d²</strong>.</p><p>In plain English: Go up and down by the same distance (d) to reach a friendly round number, multiply those, and add the square of the distance.</p>', 
+        example: '<p><strong>To find 12²:</strong></p><p>Go down 2 to reach <strong>10</strong>.</p><p>Go up 2 to reach <strong>14</strong>.</p><p>10 × 14 = 140.</p><p>Add 2² (4) → <strong>144</strong>.</p>' 
+      },
+      { 
+        title: 'Strategy: Finding "d"', 
+        content: '<p>The goal is to make the multiplication easy. Always choose a distance <strong>d</strong> that turns your number into a multiple of 10.</p><ul><li>If the number ends in 1-4, go <strong>down</strong> to the nearest 10.</li><li>If it ends in 6-9, go <strong>up</strong> to the nearest 10.</li></ul>', 
+        example: '<p><strong>47²</strong>: Nearest ten is 50 (+3). So <strong>d = 3</strong>.</p><p><strong>32²</strong>: Nearest ten is 30 (-2). So <strong>d = 2</strong>.</p>' 
+      },
+      { 
+        title: 'Walkthrough: 87²', 
+        content: '<ol><li><strong>Nearest 10:</strong> 87 is close to 90. The distance <strong>d is 3</strong>.</li><li><strong>Up & Down:</strong><br>Up 3 → 90<br>Down 3 → 84</li><li><strong>Multiply:</strong> 90 × 84. Think "9 × 84" then add a 0.<br>(9×80=720) + (9×4=36) = 756 → <strong>7560</strong>.</li><li><strong>Add d²:</strong> 7560 + 3² (9) = <strong>7569</strong>.</li></ol>', 
+        example: '<p><strong>298²</strong> (Near 300, d=2)</p><p>300 × 296 = 88,800</p><p>88,800 + 4 = <strong>88,804</strong></p>' 
+      },
+      { 
+        title: 'Bonus: Squaring Numbers Ending in 5', 
+        content: '<p>Numbers ending in 5 have their own super-fast trick!</p><ol><li>Take the first digit(s) <strong>N</strong>.</li><li>Multiply N by the next integer <strong>(N + 1)</strong>.</li><li>Append <strong>25</strong> to the end.</li></ol>', 
+        example: '<p><strong>35²</strong>:</p><p>Start with 3. Next number is 4.</p><p>3 × 4 = <strong>12</strong>.</p><p>Attach 25 → <strong>1225</strong>.</p><hr><p><strong>65²</strong>: 6 × 7 = 42 → <strong>4225</strong>.</p>' 
+      },
     ],
   },
   '2by2_criss_cross': {

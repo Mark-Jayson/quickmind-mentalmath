@@ -77,6 +77,13 @@ export const useAuthStore = defineStore('auth', () => {
                 password,
             })
             if (error) throw error
+
+            // Explicitly set user state immediately to avoid race conditions with router guards
+            if (data.session) {
+                user.value = data.session.user
+                await fetchProfile()
+            }
+
             return { data, error: null }
         } catch (error) {
             return { data: null, error }

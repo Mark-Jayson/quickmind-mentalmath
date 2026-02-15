@@ -66,7 +66,9 @@ async function handleLogin() {
 
   loading.value = true
   try {
-    await authStore.signIn(email.value, password.value)
+    const { error } = await authStore.signIn(email.value, password.value)
+    if (error) throw error
+    
     const redirect = route.query.redirect || '/dashboard'
     router.push(redirect)
   } catch (err) {
