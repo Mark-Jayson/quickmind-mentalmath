@@ -1,11 +1,11 @@
-from fastapi import FastAPI
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from .._lib.supabase import get_supabase
 
-app = FastAPI()
+router = APIRouter()
 
 
-@app.get("/api/lessons")
+@router.get("/lessons")
 async def get_lessons():
     supabase = get_supabase()
 

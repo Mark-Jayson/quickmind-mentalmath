@@ -1,22 +1,22 @@
-from fastapi import FastAPI, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from .._lib.supabase import get_supabase
 from .._lib.auth import get_current_user
 from .._lib.models import ProfileUpdate
 
-app = FastAPI()
+router = APIRouter()
 
 
-@app.get("/api/auth/profile")
+@router.get("/auth/profile")
 async def get_profile(request: Request):
     user = await get_current_user(request)
     supabase = get_supabase()
 
-    result = supabase.table("profiles").select("*").eq("id", user["id"]).single().execute()
-    return JSONResponse(result.data)
+    result = supabase.table("profiles").select("*").eq("id", user["id"]).execute()
+    return JSONResponse(result.data[0] if result.data else {})
 
 
-@app.put("/api/auth/profile")
+@router.put("/auth/profile")
 async def update_profile(request: Request):
     user = await get_current_user(request)
     body = await request.json()

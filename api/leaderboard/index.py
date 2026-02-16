@@ -1,11 +1,11 @@
-from fastapi import FastAPI, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from .._lib.supabase import get_supabase
 
-app = FastAPI()
+router = APIRouter()
 
 
-@app.get("/api/leaderboard")
+@router.get("/leaderboard")
 async def get_leaderboard(request: Request):
     category = request.query_params.get("category", "2x2")
     set_size = int(request.query_params.get("set_size", "10"))

@@ -1,0 +1,152 @@
+.venv\Scripts\python : 
+Traceback (most recent call 
+last):
+At line:1 char:1
++ .venv\Scripts\python -c 
+"import traceback; from 
+supabase import creat ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (Trace  
+  back (most recent call    
+ last)::String) [], Remo    
+teException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+  File "<string>", line 1, 
+in <module>
+    import traceback; from 
+supabase import 
+create_client; import os; 
+from dotenv import 
+load_dotenv; load_dotenv(); 
+url=os.environ.get('SUPABASE
+_URL',''); key=os.environ.ge
+t('SUPABASE_KEY',''); 
+print(f'URL:{url}'); 
+create_client(url, key)
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                   
+~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Lenovo\Docu
+ments\personal-projects\ment
+al-math\.venv\Lib\site-packa
+ges\supabase\_sync\client.py
+", line 332, in 
+create_client
+    return 
+SyncClient.create(
+           
+~~~~~~~~~~~~~~~~~^
+        
+supabase_url=supabase_url, 
+supabase_key=supabase_key, 
+options=options
+        ^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Lenovo\Docu
+ments\personal-projects\ment
+al-math\.venv\Lib\site-packa
+ges\supabase\_sync\client.py
+", line 102, in create
+    client = 
+cls(supabase_url, 
+supabase_key, options)
+  File "C:\Users\Lenovo\Docu
+ments\personal-projects\ment
+al-math\.venv\Lib\site-packa
+ges\supabase\_sync\client.py
+", line 80, in __init__
+    self.auth = self._init_s
+upabase_auth_client(
+                ~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~^
+        
+auth_url=self.auth_url,
+        
+^^^^^^^^^^^^^^^^^^^^^^^
+        
+client_options=options,
+        
+^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Lenovo\Docu
+ments\personal-projects\ment
+al-math\.venv\Lib\site-packa
+ges\supabase\_sync\client.py
+", line 243, in 
+_init_supabase_auth_client
+    return 
+SyncSupabaseAuthClient(
+        url=auth_url,
+    ...<5 lines>...
+        verify=verify,
+    )
+  File "C:\Users\Lenovo\Docu
+ments\personal-projects\ment
+al-math\.venv\Lib\site-packa
+ges\supabase\_sync\auth_clie
+nt.py", line 32, in __init__
+    
+SyncGoTrueClient.__init__(
+    
+~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<8 lines>...
+        verify=verify,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Lenovo\Docu
+ments\personal-projects\ment
+al-math\.venv\Lib\site-packa
+ges\gotrue\_sync\gotrue_clie
+nt.py", line 101, in 
+__init__
+    
+SyncGoTrueBaseAPI.__init__(
+    
+~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        proxy=proxy,
+        ^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Lenovo\Docu
+ments\personal-projects\ment
+al-math\.venv\Lib\site-packa
+ges\gotrue\_sync\gotrue_base
+_api.py", line 28, in 
+__init__
+    self._http_client = 
+http_client or SyncClient(
+                            
+           ~~~~~~~~~~^
+        verify=bool(verify),
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        http2=True,
+        ^^^^^^^^^^^
+    )
+    ^
+TypeError: 
+Client.__init__() got an 
+unexpected keyword argument 
+'proxy'
+URL:https://dvdtinsmfhkvkzbvtuub.supabase.co
