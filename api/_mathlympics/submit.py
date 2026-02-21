@@ -115,9 +115,19 @@ async def check_milestones(supabase, user_id: str, session: SessionSubmit):
             badge_id, metadata = entry, None
 
         # Check if already earned
-        existing = supabase.table("user_badges").select("id").eq("user_id", user_id).eq("badge_id", badge_id).execute()
+        existing = supabase.table("user_badges").select("id, metadata").eq("user_id", user_id).eq("badge_id", badge_id).execute()
         
-        if not existing.data:
+        already_earned = False
+        if existing.data:
+            if not metadata:
+                already_earned = True
+            else:
+                for row in existing.data:
+                    if row.get("metadata") == metadata:
+                        already_earned = True
+                        break
+        
+        if not already_earned:
             insert_data = {
                 "user_id": user_id,
                 "badge_id": badge_id,
