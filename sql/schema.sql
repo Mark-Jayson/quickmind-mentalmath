@@ -3,7 +3,7 @@
 -- ==========================================
 
 -- PROFILES (extends auth.users)
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   username TEXT UNIQUE NOT NULL,
   display_name TEXT,
@@ -14,7 +14,7 @@ CREATE TABLE public.profiles (
 );
 
 -- BADGES (static catalog)
-CREATE TABLE public.badges (
+CREATE TABLE IF NOT EXISTS public.badges (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
@@ -24,7 +24,7 @@ CREATE TABLE public.badges (
 );
 
 -- USER_BADGES (many-to-many junction)
-CREATE TABLE public.user_badges (
+CREATE TABLE IF NOT EXISTS public.user_badges (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   badge_id TEXT NOT NULL REFERENCES public.badges(id),
@@ -32,8 +32,11 @@ CREATE TABLE public.user_badges (
   metadata JSONB
 );
 
+-- In case user_badges already existed before the metadata column was added
+ALTER TABLE public.user_badges ADD COLUMN IF NOT EXISTS metadata JSONB;
+
 -- LESSONS (static curriculum catalog)
-CREATE TABLE public.lessons (
+CREATE TABLE IF NOT EXISTS public.lessons (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
   description TEXT,
@@ -44,7 +47,7 @@ CREATE TABLE public.lessons (
 );
 
 -- USER_LESSON_PROGRESS
-CREATE TABLE public.user_lesson_progress (
+CREATE TABLE IF NOT EXISTS public.user_lesson_progress (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   lesson_id TEXT NOT NULL REFERENCES public.lessons(id),
@@ -55,7 +58,7 @@ CREATE TABLE public.user_lesson_progress (
 );
 
 -- MATHLYMPICS_SESSIONS
-CREATE TABLE public.mathlympics_sessions (
+CREATE TABLE IF NOT EXISTS public.mathlympics_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   category TEXT NOT NULL CHECK (category IN ('2x1', '3x1', '2x2', 'squaring', 'multiples_11', 'day_of_week')),
@@ -69,7 +72,7 @@ CREATE TABLE public.mathlympics_sessions (
 );
 
 -- Index for leaderboard queries
-CREATE INDEX idx_sessions_leaderboard
+CREATE INDEX IF NOT EXISTS idx_sessions_leaderboard
   ON public.mathlympics_sessions (category, set_size, accuracy DESC, total_time_ms ASC);
 
 -- Enable Row Level Security
@@ -79,30 +82,39 @@ ALTER TABLE public.user_lesson_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mathlympics_sessions ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
 CREATE POLICY "Public profiles are viewable by everyone"
   ON public.profiles FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile"
   ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
 CREATE POLICY "Users can insert own profile"
   ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can view own badges" ON public.user_badges;
 CREATE POLICY "Users can view own badges"
   ON public.user_badges FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can view own progress" ON public.user_lesson_progress;
 CREATE POLICY "Users can view own progress"
   ON public.user_lesson_progress FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own progress" ON public.user_lesson_progress;
 CREATE POLICY "Users can insert own progress"
   ON public.user_lesson_progress FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own progress" ON public.user_lesson_progress;
 CREATE POLICY "Users can update own progress"
   ON public.user_lesson_progress FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Sessions are viewable by everyone (for leaderboard)" ON public.mathlympics_sessions;
 CREATE POLICY "Sessions are viewable by everyone (for leaderboard)"
   ON public.mathlympics_sessions FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Users can insert own sessions" ON public.mathlympics_sessions;
 CREATE POLICY "Users can insert own sessions"
   ON public.mathlympics_sessions FOR INSERT WITH CHECK (auth.uid() = user_id);
 
@@ -120,6 +132,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
