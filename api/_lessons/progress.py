@@ -56,6 +56,8 @@ async def complete_lesson(request: Request):
         lesson_data = lesson_result.data[0] if lesson_result.data else None
 
         new_badges = []
+        xp_earned = 0
+
         if lesson_data and lesson_data.get("badge_id"):
             badge_id = lesson_data["badge_id"]
             # Check if already earned
@@ -67,18 +69,58 @@ async def complete_lesson(request: Request):
                     "badge_id": badge_id,
                 }).execute()
 
-                # Award XP
+                # Get badge details for response and XP
                 badge_result = supabase.table("badges").select("*").eq("id", badge_id).execute()
                 badge_data = badge_result.data[0] if badge_result.data else None
                 
                 if badge_data:
-                    xp = badge_data.get("xp_reward", 0)
-                    profile_result = supabase.table("profiles").select("xp").eq("id", user["id"]).execute()
-                    profile_data = profile_result.data[0] if profile_result.data else None
-                    
-                    current_xp = profile_data.get("xp", 0) if profile_data else 0
-                    supabase.table("profiles").update({"xp": current_xp + xp}).eq("id", user["id"]).execute()
+                    xp_earned += badge_data.get("xp_reward", 0)
                     new_badges.append(badge_data)
+
+        # ── Check milestone: all lessons completed ──
+        try:
+            total_lessons = supabase.table("lessons").select("id", count="exact").execute()
+            completed_lessons = (
+                supabase.table("user_lesson_progress")
+                .select("id", count="exact")
+                .eq("user_id", user["id"])
+                .eq("completed", True)
+                .execute()
+            )
+            
+            if (total_lessons.count is not None 
+                and completed_lessons.count is not None 
+                and completed_lessons.count >= total_lessons.count
+                and total_lessons.count > 0):
+                
+                # Check if milestone_all_lessons already earned
+                existing_milestone = (
+                    supabase.table("user_badges")
+                    .select("id")
+                    .eq("user_id", user["id"])
+                    .eq("badge_id", "milestone_all_lessons")
+                    .execute()
+                )
+                
+                if not existing_milestone.data:
+                    supabase.table("user_badges").insert({
+                        "user_id": user["id"],
+                        "badge_id": "milestone_all_lessons",
+                    }).execute()
+                    
+                    milestone_badge = supabase.table("badges").select("*").eq("id", "milestone_all_lessons").execute()
+                    if milestone_badge.data:
+                        xp_earned += milestone_badge.data[0].get("xp_reward", 0)
+                        new_badges.append(milestone_badge.data[0])
+        except Exception as e:
+            print(f"All-lessons milestone check error: {e}")
+
+        # Award XP
+        if xp_earned > 0:
+            profile_result = supabase.table("profiles").select("xp").eq("id", user["id"]).execute()
+            profile_data = profile_result.data[0] if profile_result.data else None
+            current_xp = profile_data.get("xp", 0) if profile_data else 0
+            supabase.table("profiles").update({"xp": current_xp + xp_earned}).eq("id", user["id"]).execute()
 
         response_data = result.data[0] if result.data else {}
         response_data["new_badges"] = new_badges

@@ -56,6 +56,10 @@ async def check_milestones(supabase, user_id: str, session: SessionSubmit):
     if count.count == 1:
         badges_to_award.append("mathlympics_first_session")
 
+    # 100 sessions milestone
+    if count.count is not None and count.count >= 100:
+        badges_to_award.append("milestone_100_sessions")
+
     # Perfect score badges
     if session.accuracy == 1.0:
         perfect_badges = {
@@ -74,6 +78,30 @@ async def check_milestones(supabase, user_id: str, session: SessionSubmit):
     # 40-question marathon
     if session.set_size == 40:
         badges_to_award.append("mathlympics_40_set")
+
+    # ── Leaderboard Top 3 Medal Badges ──
+    # Query the leaderboard for this category & set_size, ordered by accuracy
+    # DESC then total_time_ms ASC, and check the user's rank.
+    try:
+        leaderboard = (
+            supabase.table("mathlympics_sessions")
+            .select("user_id, accuracy, total_time_ms")
+            .eq("category", session.category)
+            .eq("set_size", session.set_size)
+            .order("accuracy", desc=True)
+            .order("total_time_ms", desc=False)
+            .limit(3)
+            .execute()
+        )
+
+        if leaderboard.data:
+            medal_map = {0: "medal_gold", 1: "medal_silver", 2: "medal_bronze"}
+            for rank_idx, entry in enumerate(leaderboard.data):
+                if entry["user_id"] == user_id:
+                    badges_to_award.append(medal_map[rank_idx])
+                    break
+    except Exception as e:
+        print(f"Leaderboard medal check error: {e}")
 
     # Award badges (ignore duplicates via upsert)
     xp_earned = 0

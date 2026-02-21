@@ -113,7 +113,7 @@ BEGIN
   VALUES (
     new.id,
     COALESCE(new.raw_user_meta_data->>'username', 'user_' || left(new.id::text, 8)),
-    COALESCE(new.raw_user_meta_data->>'username', 'User')
+    COALESCE(new.raw_user_meta_data->>'display_name', new.raw_user_meta_data->>'username', 'User')
   );
   RETURN new;
 END;

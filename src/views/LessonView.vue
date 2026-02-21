@@ -63,7 +63,8 @@
     <!-- Badge Overlay -->
     <BadgeAwardOverlay 
       v-if="showBadgeOverlay && newBadges.length > 0" 
-      :badge="newBadges[0]" 
+      :badge="newBadges[currentBadgeIndex]" 
+      :key="currentBadgeIndex"
       @close="handleOverlayClose" 
     />
   </div>
@@ -87,6 +88,7 @@ const currentStep = ref(0)
 const showQuiz = ref(false)
 const newBadges = ref([])
 const showBadgeOverlay = ref(false)
+const currentBadgeIndex = ref(0)
 
 const lessonsDB = {
   left_to_right_addition: {
@@ -203,6 +205,7 @@ async function completeLesson(quizScore) {
     
     if (result.new_badges && result.new_badges.length > 0) {
       newBadges.value = result.new_badges
+      currentBadgeIndex.value = 0
       showBadgeOverlay.value = true
       return // Wait for overlay close to redirect
     }
@@ -211,8 +214,14 @@ async function completeLesson(quizScore) {
 }
 
 function handleOverlayClose() {
-  showBadgeOverlay.value = false
-  router.push('/curriculum')
+  if (currentBadgeIndex.value < newBadges.value.length - 1) {
+    // Show the next badge
+    currentBadgeIndex.value++
+  } else {
+    // All badges shown, redirect
+    showBadgeOverlay.value = false
+    router.push('/curriculum')
+  }
 }
 </script>
 

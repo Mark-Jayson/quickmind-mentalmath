@@ -24,6 +24,13 @@
 
       <form v-else @submit.prevent="handleSignup" class="auth-form">
         <QmInput
+          id="signup-fullname"
+          v-model="fullName"
+          label="Full Name"
+          placeholder="Arthur Benjamin"
+          :error="fullNameError"
+        />
+        <QmInput
           id="signup-username"
           v-model="username"
           label="Username"
@@ -68,9 +75,11 @@ import QmButton from '@/components/ui/QmButton.vue'
 
 const authStore = useAuthStore()
 
+const fullName = ref('')
 const username = ref('')
 const email = ref('')
 const password = ref('')
+const fullNameError = ref('')
 const usernameError = ref('')
 const emailError = ref('')
 const passwordError = ref('')
@@ -79,18 +88,20 @@ const loading = ref(false)
 const success = ref(false)
 
 async function handleSignup() {
+  fullNameError.value = ''
   usernameError.value = ''
   emailError.value = ''
   passwordError.value = ''
   serverError.value = ''
 
+  if (!fullName.value) { fullNameError.value = 'Full Name is required'; return }
   if (!username.value) { usernameError.value = 'Username is required'; return }
   if (!email.value) { emailError.value = 'Email is required'; return }
   if (password.value.length < 6) { passwordError.value = 'Must be at least 6 characters'; return }
 
   loading.value = true
   try {
-    const { error } = await authStore.signUp(email.value, password.value, username.value)
+    const { error } = await authStore.signUp(email.value, password.value, username.value, fullName.value)
     if (error) throw error
     success.value = true
   } catch (err) {

@@ -164,7 +164,8 @@
       <!-- Badge Overlay -->
       <BadgeAwardOverlay 
         v-if="showBadgeOverlay && newBadges.length > 0" 
-        :badge="newBadges[0]" 
+        :badge="newBadges[currentBadgeIndex]" 
+        :key="currentBadgeIndex"
         @close="closeOverlay" 
       />
     </div>
@@ -189,6 +190,7 @@ const currentAnswer = ref('')
 const answerInput = ref(null)
 const newBadges = ref([])
 const showBadgeOverlay = ref(false)
+const currentBadgeIndex = ref(0)
 
 const categoryOptions = [
   { id: '2x1', title: '2 × 1 Digit', example: '47 × 8', tag: 'Beginner' },
@@ -259,14 +261,19 @@ async function handleSessionEnd() {
   const result = await store.submitSession()
   if (result.new_badges && result.new_badges.length > 0) {
     newBadges.value = result.new_badges
+    currentBadgeIndex.value = 0
     showBadgeOverlay.value = true
   }
 }
 
 function closeOverlay() {
-  showBadgeOverlay.value = false
-  // If multiple badges, maybe show next? For now just close.
-  // We stay on review page
+  if (currentBadgeIndex.value < newBadges.value.length - 1) {
+    // Show the next badge
+    currentBadgeIndex.value++
+  } else {
+    // All badges shown, close overlay
+    showBadgeOverlay.value = false
+  }
 }
 
 function quitGame() { timer.stop(); store.reset() }

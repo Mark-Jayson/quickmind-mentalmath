@@ -3,7 +3,26 @@
     <header class="dash-header animate-fade-in-up">
       <div class="dash-welcome">
         <p class="dash-tag">DASHBOARD</p>
-        <h1>Welcome back<template v-if="authStore.profile">, {{ authStore.profile.display_name || authStore.profile.username }}</template></h1>
+        <div class="welcome-row">
+          <h1>Welcome back<template v-if="authStore.profile">, {{ authStore.profile.display_name || authStore.profile.username }}</template></h1>
+          <button v-if="!isEditing" class="edit-profile-btn" @click="startEditing">
+            <component :is="User" :size="14" />
+            Edit Name
+          </button>
+        </div>
+        
+        <div v-if="isEditing" class="edit-name-form">
+          <input 
+            v-model="editedName" 
+            class="name-input" 
+            placeholder="Your Full Name" 
+            @keyup.enter="saveProfile"
+          />
+          <div class="edit-actions">
+            <button class="save-btn" @click="saveProfile" :disabled="profileStore.loading">Save</button>
+            <button class="cancel-btn" @click="isEditing = false">Cancel</button>
+          </div>
+        </div>
         <hr class="plasma-line" />
       </div>
       <div class="dash-stats" v-if="authStore.profile">
@@ -93,7 +112,7 @@ import { onMounted, computed, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useProfileStore } from '@/stores/profile'
 import { supabase } from '@/lib/supabase'
-import { Zap, Timer, BookOpen, Trophy, Activity, Award, Info } from 'lucide-vue-next'
+import { Zap, Timer, BookOpen, Trophy, Activity, Award, Info, User } from 'lucide-vue-next'
 import BadgeItem from '@/components/features/BadgeItem.vue'
 import BadgesOverlay from '@/components/features/BadgesOverlay.vue'
 
@@ -101,6 +120,25 @@ const authStore = useAuthStore()
 const profileStore = useProfileStore()
 const recentSessions = ref([])
 const showBadgesOverlay = ref(false)
+
+const isEditing = ref(false)
+const editedName = ref('')
+
+function startEditing() {
+  editedName.value = authStore.profile?.display_name || ''
+  isEditing.value = true
+}
+
+async function saveProfile() {
+  if (!editedName.value) return
+  const { error } = await profileStore.updateProfile(authStore.user.id, {
+    display_name: editedName.value
+  })
+  if (!error) {
+    await authStore.fetchProfile() // Sync auth store
+    isEditing.value = false
+  }
+}
 
 onMounted(async () => {
   if (authStore.user) {
@@ -157,6 +195,75 @@ const groupedBadges = computed(() => {
 
 .dash-header h1 {
   font-size: 2rem;
+  margin: 0;
+}
+
+.welcome-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.edit-profile-btn {
+  background: none;
+  border: 1px solid var(--color-border-light);
+  color: var(--color-subtext);
+  font-size: 0.72rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+}
+
+.edit-profile-btn:hover {
+  background: var(--color-workshop-alt);
+  color: var(--color-charcoal);
+  border-color: var(--color-border);
+}
+
+.edit-name-form {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 300px;
+}
+
+.name-input {
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  font-size: 0.88rem;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.save-btn, .cancel-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save-btn {
+  background: var(--color-plasma);
+  color: #1a1a1a;
+  border: none;
+}
+
+.cancel-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-subtext);
 }
 
 .stat-card {
