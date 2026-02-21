@@ -58,8 +58,19 @@ const router = createRouter({
     },
 })
 
-router.beforeEach(async (to) => {
+import { useMathlympicsStore } from '@/stores/mathlympics'
+
+router.beforeEach(async (to, from) => {
     const authStore = useAuthStore()
+    
+    // Check if navigating away from an active Mathlympics game
+    if (from.name === 'Mathlympics' && to.name !== 'Mathlympics') {
+        const mathStore = useMathlympicsStore()
+        if (mathStore.isPlaying && !mathStore.pendingNavigation) {
+            mathStore.pendingNavigation = to
+            return false // Abort navigation; the view's watcher will show the Quit overlay
+        }
+    }
 
     // Wait for auth to initialize on first navigation
     if (!authStore.initialized) {

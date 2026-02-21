@@ -98,7 +98,7 @@ async def check_milestones(supabase, user_id: str, session: SessionSubmit):
             medal_map = {0: "medal_gold", 1: "medal_silver", 2: "medal_bronze"}
             for rank_idx, entry in enumerate(leaderboard.data):
                 if entry["user_id"] == user_id:
-                    badges_to_award.append(medal_map[rank_idx])
+                    badges_to_award.append((medal_map[rank_idx], {"category": session.category}))
                     break
     except Exception as e:
         print(f"Leaderboard medal check error: {e}")
@@ -107,20 +107,31 @@ async def check_milestones(supabase, user_id: str, session: SessionSubmit):
     xp_earned = 0
     new_badges = []
 
-    for badge_id in badges_to_award:
+    for entry in badges_to_award:
+        # Entry can be a plain badge_id string or a (badge_id, metadata) tuple
+        if isinstance(entry, tuple):
+            badge_id, metadata = entry
+        else:
+            badge_id, metadata = entry, None
+
         # Check if already earned
         existing = supabase.table("user_badges").select("id").eq("user_id", user_id).eq("badge_id", badge_id).execute()
         
         if not existing.data:
-            supabase.table("user_badges").insert({
+            insert_data = {
                 "user_id": user_id,
                 "badge_id": badge_id,
-            }).execute()
+            }
+            if metadata:
+                insert_data["metadata"] = metadata
+            supabase.table("user_badges").insert(insert_data).execute()
 
             # Get badge details for response and XP
             badge_res = supabase.table("badges").select("*").eq("id", badge_id).execute()
             badge_item = badge_res.data[0] if badge_res.data else None
             if badge_item:
+                if metadata:
+                    badge_item["metadata"] = metadata
                 xp_earned += badge_item.get("xp_reward", 0)
                 new_badges.append(badge_item)
 

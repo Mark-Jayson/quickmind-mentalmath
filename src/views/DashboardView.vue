@@ -92,11 +92,11 @@
             <p>Complete lessons and challenges to earn badges.</p>
           </div>
           <div v-else class="badges-grid">
-            <BadgeItem
-              v-for="badge in groupedBadges"
-              :key="badge.id"
-              v-bind="badge"
-            />
+            <div v-for="badge in groupedBadges" :key="badge.id" class="badge-card">
+              <BadgeItem v-bind="badge" />
+              <span class="badge-name">{{ badge.name }}</span>
+              <span v-if="badgeSubtitle(badge)" class="badge-subtitle">{{ badgeSubtitle(badge) }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -167,6 +167,23 @@ const groupedBadges = computed(() => {
   })
   return Object.values(groups)
 })
+
+const categoryLabels = {
+  '2x1': '2×1 Digit',
+  '3x1': '3×1 Digit',
+  '2x2': '2×2 Digit',
+  'squaring': 'Squaring',
+  'multiples_11': 'Multiples of 11',
+  'day_of_week': 'Day of Week',
+}
+
+function badgeSubtitle(badge) {
+  const medalIds = ['medal_gold', 'medal_silver', 'medal_bronze']
+  if (medalIds.includes(badge.id) && badge.metadata?.category) {
+    return categoryLabels[badge.metadata.category] || badge.metadata.category
+  }
+  return null
+}
 </script>
 
 <style scoped>
@@ -386,9 +403,38 @@ const groupedBadges = computed(() => {
 
 .badges-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 1rem;
   padding: 0.5rem;
+}
+
+.badge-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  text-align: center;
+}
+
+.badge-name {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--color-charcoal);
+  line-height: 1.2;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.badge-subtitle {
+  font-size: 0.58rem;
+  font-weight: 500;
+  color: var(--color-subtext);
+  line-height: 1.1;
 }
 
 .activity-list {

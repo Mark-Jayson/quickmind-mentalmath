@@ -28,7 +28,8 @@ CREATE TABLE public.user_badges (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   badge_id TEXT NOT NULL REFERENCES public.badges(id),
-  earned_at TIMESTAMPTZ DEFAULT now()
+  earned_at TIMESTAMPTZ DEFAULT now(),
+  metadata JSONB
 );
 
 -- LESSONS (static curriculum catalog)

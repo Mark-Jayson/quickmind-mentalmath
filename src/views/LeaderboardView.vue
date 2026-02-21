@@ -46,7 +46,12 @@
         <component :is="Trophy" :size="40" class="empty-icon" />
         <h3>No entries yet</h3>
         <p>Be the first to compete in this category!</p>
-        <router-link to="/mathlympics" class="start-link">Start a challenge →</router-link>
+        <router-link 
+          :to="{ path: '/mathlympics', query: { autoStart: 'true', category: selectedCategory, setSize: selectedSetSize } }" 
+          class="start-link"
+        >
+          Start a challenge →
+        </router-link>
       </div>
 
       <table v-else class="lb-table">

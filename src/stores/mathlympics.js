@@ -143,6 +143,10 @@ export const useMathlympicsStore = defineStore('mathlympics', () => {
         lapStart.value = null
     }
 
+    const isPlaying = computed(() => state.value === 'playing')
+    // Set by router guard when user tries to navigate away during a game
+    const pendingNavigation = ref(null)
+
     return {
         state,
         category,
@@ -159,6 +163,8 @@ export const useMathlympicsStore = defineStore('mathlympics', () => {
         totalTimeMs,
         avgTimeMs,
         results,
+        isPlaying,
+        pendingNavigation,
         configure,
         startGame,
         submitAnswer,

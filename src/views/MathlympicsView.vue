@@ -169,20 +169,31 @@
         @close="closeOverlay" 
       />
     </div>
+
+    <!-- Quit Confirmation Overlay -->
+    <QuitConfirmOverlay 
+      v-if="showQuitConfirm" 
+      @quit="handleQuitSession" 
+      @continue="handleContinue" 
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick, onUnmounted, watch, computed } from 'vue'
+import { ref, nextTick, onUnmounted, watch, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useMathlympicsStore } from '@/stores/mathlympics'
 import { useTimer } from '@/composables/useTimer'
 import QmButton from '@/components/ui/QmButton.vue'
 import QmTimer from '@/components/ui/QmTimer.vue'
 import BadgeAwardOverlay from '@/components/features/BadgeAwardOverlay.vue'
+import QuitConfirmOverlay from '@/components/features/QuitConfirmOverlay.vue'
 import { Play, ArrowRight, X, CheckCircle, XCircle, RotateCcw } from 'lucide-vue-next'
 
 const store = useMathlympicsStore()
 const timer = useTimer()
+const route = useRoute()
+const router = useRouter()
 
 const selectedCategory = ref('2x2')
 const selectedSize = ref(10)
@@ -191,6 +202,7 @@ const answerInput = ref(null)
 const newBadges = ref([])
 const showBadgeOverlay = ref(false)
 const currentBadgeIndex = ref(0)
+const showQuitConfirm = ref(false)
 
 const categoryOptions = [
   { id: '2x1', title: '2 × 1 Digit', example: '47 × 8', tag: 'Beginner' },
@@ -276,7 +288,52 @@ function closeOverlay() {
   }
 }
 
-function quitGame() { timer.stop(); store.reset() }
+// ── Auto Start Logic ──
+onMounted(() => {
+  if (route.query.autoStart === 'true') {
+    const cat = route.query.category
+    const size = parseInt(route.query.setSize, 10)
+    if (cat && size && !isNaN(size)) {
+      // Small timeout ensures store is ready
+      setTimeout(() => {
+        selectedCategory.value = cat
+        selectedSize.value = size
+        startGame()
+      }, 50)
+    }
+  }
+})
+
+// ── Quit & Navigation Guard Logic ──
+watch(() => store.pendingNavigation, (newVal) => {
+  if (newVal) {
+    showQuitConfirm.value = true
+  }
+})
+
+function quitGame() {
+  showQuitConfirm.value = true
+}
+
+function handleQuitSession() {
+  showQuitConfirm.value = false
+  timer.stop()
+  store.reset()
+
+  if (store.pendingNavigation) {
+    const nav = store.pendingNavigation
+    store.pendingNavigation = null
+    router.push(nav)
+  }
+}
+
+function handleContinue() {
+  showQuitConfirm.value = false
+  if (store.pendingNavigation) {
+    store.pendingNavigation = null
+  }
+}
+
 function playAgain() { store.startGame(); timer.reset(); timer.start(); nextTick(() => answerInput.value?.focus()) }
 function backToConfig() { store.reset() }
 

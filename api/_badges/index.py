@@ -13,7 +13,7 @@ async def get_badges(request: Request):
 
     result = (
         supabase.table("user_badges")
-        .select("earned_at, badges(*)")
+        .select("earned_at, metadata, badges(*)")
         .eq("user_id", user["id"])
         .order("earned_at", desc=True)
         .execute()
@@ -23,6 +23,7 @@ async def get_badges(request: Request):
     for row in result.data or []:
         badge = row.get("badges", {})
         badge["earned_at"] = row["earned_at"]
+        badge["metadata"] = row.get("metadata")
         badges.append(badge)
 
     return JSONResponse(badges)
