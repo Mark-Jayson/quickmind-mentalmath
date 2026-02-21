@@ -28,3 +28,4 @@ Thumbs.db
 # Python
 .pytest_cache/
 .venv/
+.vercel

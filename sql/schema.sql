@@ -122,3 +122,39 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Leaderboard RPC function
+CREATE OR REPLACE FUNCTION public.get_leaderboard(
+  p_category TEXT,
+  p_set_size INTEGER
+)
+RETURNS TABLE (
+  rank BIGINT,
+  username TEXT,
+  display_name TEXT,
+  avatar_url TEXT,
+  score INTEGER,
+  accuracy REAL,
+  total_time_ms INTEGER,
+  played_at TIMESTAMPTZ
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+AS $$
+  SELECT
+    ROW_NUMBER() OVER (ORDER BY ms.accuracy DESC, ms.total_time_ms ASC) AS rank,
+    p.username,
+    p.display_name,
+    p.avatar_url,
+    ms.score,
+    ms.accuracy,
+    ms.total_time_ms,
+    ms.played_at
+  FROM public.mathlympics_sessions ms
+  JOIN public.profiles p ON p.id = ms.user_id
+  WHERE ms.category = p_category
+    AND ms.set_size = p_set_size
+  ORDER BY ms.accuracy DESC, ms.total_time_ms ASC
+  LIMIT 100;
+$$;

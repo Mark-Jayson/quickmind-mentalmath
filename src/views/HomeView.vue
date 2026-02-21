@@ -25,15 +25,7 @@
             </router-link>
           </div>
           
-          <div class="hero-social-proof animate-fade-in-up delay-400">
-            <div class="avatars">
-              <div class="avatar" style="background-image: url('https://i.pravatar.cc/100?img=1')"></div>
-              <div class="avatar" style="background-image: url('https://i.pravatar.cc/100?img=2')"></div>
-              <div class="avatar" style="background-image: url('https://i.pravatar.cc/100?img=3')"></div>
-              <div class="avatar-count">+2k</div>
-            </div>
-            <p>Join <strong>2,000+</strong> minds training daily.</p>
-          </div>
+          
         </div>
 
         <div class="hero-visual animate-fade-in-up delay-400">
@@ -218,7 +210,7 @@ import { BookOpen, Timer, Trophy, Brain, ArrowRight } from 'lucide-vue-next'
 
 const features = [
   { icon: BookOpen, title: 'Interactive Lessons', desc: 'Step-by-step techniques from Arthur Benjamin\'s "Secrets of Mental Math" with worked examples and practice.' },
-  { icon: Timer, title: 'Mathlympics Engine', desc: 'Timed challenges across 4 categories. Track your speed and accuracy as you improve.' },
+  { icon: Timer, title: 'Challenges', desc: 'Timed challenges across 4 categories. Track your speed and accuracy as you improve.' },
   { icon: Trophy, title: 'Global Leaderboards', desc: 'Compete against other mental math enthusiasts. Climb the ranks by accuracy and speed.' },
   { icon: Brain, title: 'Memory Techniques', desc: 'Learn the phonetic code and workspace management strategies used by professionals.' },
 ]
@@ -267,6 +259,21 @@ const categories = [
   align-items: center;
   position: relative;
   z-index: 1;
+}
+
+@media (max-width: 1024px) {
+  .features-grid, .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .features-grid, .category-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-inner {
+    grid-template-columns: 1fr;
+  }
 }
 
 .hero-badge {
@@ -465,7 +472,7 @@ const categories = [
 }
 
 .stats-inner {
-  max-width: 1000px;
+  max-width: 800px;
   margin: 0 auto;
   display: flex;
   justify-content: space-around;
@@ -506,7 +513,7 @@ const categories = [
 }
 
 .features-inner, .categories-inner, .gamification-inner {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -545,7 +552,7 @@ const categories = [
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
 }
 
@@ -726,7 +733,7 @@ const categories = [
 
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
 }
 

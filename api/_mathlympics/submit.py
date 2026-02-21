@@ -9,34 +9,42 @@ router = APIRouter()
 
 @router.post("/mathlympics/submit")
 async def submit_session(request: Request):
-    user = await get_current_user(request)
-    body = await request.json()
-    session = SessionSubmit(**body)
+    try:
+        user = await get_current_user(request)
+        body = await request.json()
+        session = SessionSubmit(**body)
 
-    supabase = get_supabase()
+        supabase = get_supabase()
 
-    result = (
-        supabase.table("mathlympics_sessions")
-        .insert({
-            "user_id": user["id"],
-            "category": session.category,
-            "set_size": session.set_size,
-            "score": session.score,
-            "accuracy": session.accuracy,
-            "total_time_ms": session.total_time_ms,
-            "avg_time_ms": session.avg_time_ms,
-            "detail": session.detail,
-        })
-        .execute()
-    )
+        result = (
+            supabase.table("mathlympics_sessions")
+            .insert({
+                "user_id": user["id"],
+                "category": session.category,
+                "set_size": session.set_size,
+                "score": session.score,
+                "accuracy": session.accuracy,
+                "total_time_ms": session.total_time_ms,
+                "avg_time_ms": session.avg_time_ms,
+                "detail": session.detail,
+            })
+            .execute()
+        )
 
-    # Check for milestone badges
-    new_badges = await check_milestones(supabase, user["id"], session)
+        # result.data is a list of inserted rows
+        if not result.data:
+            return JSONResponse({"error": "Failed to insert session"}, status_code=500)
 
-    response_data = result.data[0] if result.data else {}
-    response_data["new_badges"] = new_badges
+        # Check for milestone badges
+        new_badges = await check_milestones(supabase, user["id"], session)
 
-    return JSONResponse(response_data, status_code=201)
+        response_data = result.data[0]
+        response_data["new_badges"] = new_badges
+
+        return JSONResponse(response_data, status_code=201)
+    except Exception as e:
+        print(f"Error in submit_session: {str(e)}")
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
 async def check_milestones(supabase, user_id: str, session: SessionSubmit):

@@ -97,7 +97,10 @@ export const useMathlympicsStore = defineStore('mathlympics', () => {
                 body: JSON.stringify(sessionData)
             })
 
-            if (!response.ok) throw new Error('Failed to submit session')
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error(errorData.error || 'Failed to submit session')
+            }
             
             const result = await response.json()
             

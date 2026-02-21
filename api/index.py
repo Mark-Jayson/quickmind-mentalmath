@@ -13,13 +13,13 @@ if os.path.exists(env_path):
 else:
     load_dotenv()
 
-from .lessons.progress import router as lessons_progress_router
-from .lessons.index import router as lessons_index_router
-from .mathlympics.submit import router as mathlympics_submit_router
-from .mathlympics.history import router as mathlympics_history_router
-from .badges.index import router as badges_router
-from .leaderboard.index import router as leaderboard_router
-from .auth.profile import router as profile_router
+from ._lessons.progress import router as lessons_progress_router
+from ._lessons.index import router as lessons_index_router
+from ._mathlympics.submit import router as mathlympics_submit_router
+from ._mathlympics.history import router as mathlympics_history_router
+from ._badges.index import router as badges_router
+from ._leaderboard.index import router as leaderboard_router
+from ._auth.profile import router as profile_router
 
 app = FastAPI()
 
