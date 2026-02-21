@@ -111,14 +111,6 @@ export const useMathlympicsStore = defineStore('mathlympics', () => {
         }
     }
 
-    function submitAnswer(answer) {
-        const now = Date.now()
-        answers.value.push(answer)
-        lapTimes.value.push(now - lapStart.value)
-        lapStart.value = now
-        currentIndex.value++
-    }
-
     async function submitSession() {
         if (currentIndex.value >= questions.value.length) {
             state.value = 'reviewing'

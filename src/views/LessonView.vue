@@ -72,7 +72,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, ArrowRight, Check, Zap } from 'lucide-vue-next'
+import { ArrowLeft, ArrowRight, Zap } from 'lucide-vue-next'
 import QmButton from '@/components/ui/QmButton.vue'
 import LessonQuiz from '@/components/features/LessonQuiz.vue'
 import BadgeAwardOverlay from '@/components/features/BadgeAwardOverlay.vue'

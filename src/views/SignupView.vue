@@ -90,7 +90,8 @@ async function handleSignup() {
 
   loading.value = true
   try {
-    await authStore.signUp(email.value, password.value, username.value)
+    const { error } = await authStore.signUp(email.value, password.value, username.value)
+    if (error) throw error
     success.value = true
   } catch (err) {
     serverError.value = err.message || 'Sign up failed'

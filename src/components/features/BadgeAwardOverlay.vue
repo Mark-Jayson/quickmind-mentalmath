@@ -115,8 +115,8 @@ onUnmounted(() => {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--color-plasma);
   margin-bottom: 2rem;
+  background: linear-gradient(135deg, var(--color-plasma) 0%, #38bdf8 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

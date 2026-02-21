@@ -1,11 +1,10 @@
-from fastapi import FastAPI, Request, APIRouter
+from fastapi import Request, APIRouter
 from fastapi.responses import JSONResponse
 from .._lib.supabase import get_supabase
 from .._lib.auth import get_current_user
 from .._lib.models import SessionSubmit
 
 router = APIRouter()
-app = FastAPI()
 
 
 @router.post("/mathlympics/submit")

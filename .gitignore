@@ -9,7 +9,7 @@ dist/
 # Environment
 .env
 .env.local
-.env.*.local
+.env*.local
 
 # IDE
 .vscode/
@@ -24,5 +24,7 @@ Thumbs.db
 
 # Logs
 *.log
-.vercel
-.env*.local
+
+# Python
+.pytest_cache/
+.venv/

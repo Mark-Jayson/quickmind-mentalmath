@@ -37,7 +37,12 @@
     </div>
 
     <div class="lb-table-container">
-      <div v-if="entries.length === 0" class="lb-empty">
+      <div v-if="loading" class="lb-loading">
+        <div class="loading-spinner" />
+        <p>Loading leaderboard...</p>
+      </div>
+
+      <div v-else-if="entries.length === 0" class="lb-empty">
         <component :is="Trophy" :size="40" class="empty-icon" />
         <h3>No entries yet</h3>
         <p>Be the first to compete in this category!</p>
@@ -255,5 +260,30 @@ watch([selectedCategory, selectedSetSize], () => {
 @media (max-width: 768px) {
   .lb-filters { flex-direction: column; gap: 1rem; }
   .th-score, .td-score { display: none; }
+}
+
+.lb-loading {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.lb-loading p {
+  color: var(--color-subtext);
+  font-size: 0.88rem;
+  margin-top: 1rem;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border-light);
+  border-top-color: var(--color-plasma);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 </style>

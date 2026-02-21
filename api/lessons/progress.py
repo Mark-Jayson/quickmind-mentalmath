@@ -1,11 +1,12 @@
-from fastapi import FastAPI, Request, APIRouter
+from datetime import datetime, timezone
+
+from fastapi import Request, APIRouter
 from fastapi.responses import JSONResponse
 from .._lib.supabase import get_supabase
 from .._lib.auth import get_current_user
 from .._lib.models import LessonComplete
 
 router = APIRouter()
-app = FastAPI()
 
 @router.get("/lessons/progress")
 async def get_progress(request: Request):
@@ -39,7 +40,7 @@ async def complete_lesson(request: Request):
                 "lesson_id": completion.lesson_id,
                 "completed": True,
                 "quiz_score": completion.quiz_score,
-                "completed_at": "now()",
+                "completed_at": datetime.now(timezone.utc).isoformat(),
             })
             .execute()
         )
