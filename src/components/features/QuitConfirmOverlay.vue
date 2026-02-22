@@ -1,3 +1,4 @@
+<!-- This is a sample comment. -->
 <template>
   <transition name="overlay-fade" appear>
     <div class="quit-overlay" @click.self="$emit('continue')">
