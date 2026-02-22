@@ -95,7 +95,9 @@
             <div v-for="badge in groupedBadges" :key="badge.id" class="badge-card">
               <BadgeItem v-bind="badge" />
               <span class="badge-name">{{ badge.name }}</span>
-              <span v-if="badgeSubtitle(badge)" class="badge-subtitle">{{ badgeSubtitle(badge) }}</span>
+              <template v-if="badge.categories && badge.categories.length">
+                <span v-for="(cat, idx) in badge.categories" :key="idx" class="badge-subtitle">{{ cat }}</span>
+              </template>
             </div>
           </div>
         </div>
@@ -157,17 +159,6 @@ async function fetchRecentSessions() {
   recentSessions.value = data || []
 }
 
-const groupedBadges = computed(() => {
-  const groups = {}
-  profileStore.badges.forEach(badge => {
-    if (!groups[badge.id]) {
-      groups[badge.id] = { ...badge, count: 0 }
-    }
-    groups[badge.id].count++
-  })
-  return Object.values(groups)
-})
-
 const categoryLabels = {
   '2x1': '2×1 Digit',
   '3x1': '3×1 Digit',
@@ -177,13 +168,23 @@ const categoryLabels = {
   'day_of_week': 'Day of Week',
 }
 
-function badgeSubtitle(badge) {
-  const medalIds = ['medal_gold', 'medal_silver', 'medal_bronze']
-  if (medalIds.includes(badge.id) && badge.metadata?.category) {
-    return categoryLabels[badge.metadata.category] || badge.metadata.category
-  }
-  return null
-}
+const groupedBadges = computed(() => {
+  const groups = {}
+  profileStore.badges.forEach(badge => {
+    if (!groups[badge.id]) {
+      groups[badge.id] = { ...badge, count: 0, categories: [] }
+    }
+    groups[badge.id].count++
+
+    if (['medal_gold', 'medal_silver', 'medal_bronze'].includes(badge.id) && badge.metadata?.category) {
+      const catLabel = categoryLabels[badge.metadata.category] || badge.metadata.category
+      if (!groups[badge.id].categories.includes(catLabel)) {
+        groups[badge.id].categories.push(catLabel)
+      }
+    }
+  })
+  return Object.values(groups)
+})
 </script>
 
 <style scoped>
